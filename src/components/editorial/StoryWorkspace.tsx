@@ -474,12 +474,12 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           {/* Chief Editor Notice */}
           <div className="flex items-center gap-2 text-xs text-stone-600 dark:text-stone-400">
-            <span className="font-serif font-bold text-red-700 dark:text-red-400 uppercase tracking-wider text-[11px]">
-              दैनिक बहुमोल समाज
+            <span className="font-mono-code font-bold text-cyan-500 uppercase tracking-wider text-[11px]">
+              SAMVAD INTEL
             </span>
             <span>•</span>
-            <span>
-              मुख्य संपादक: <strong className="text-stone-900 dark:text-stone-200">दिलीप सोनाळे</strong>
+            <span className="font-mono-code">
+              Intelligence Operations & Editorial Verification Desk
             </span>
           </div>
 
@@ -1302,13 +1302,13 @@ const PublicArticlePreview: React.FC<PublicArticlePreviewProps> = ({
       {/* Newspaper Masthead Bar */}
       <div className="bg-stone-900 text-stone-100 px-4 py-2 border-b border-stone-800 flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-serif font-black uppercase tracking-wider text-red-500">
-            दैनिक बहुमोल समाज
+          <span className="font-mono-code font-black uppercase tracking-wider text-cyan-400">
+            SAMVAD INTEL
           </span>
           <span className="text-stone-500">|</span>
-          <span className="text-stone-400 text-[11px]">साप्ताहिक समालोचन</span>
+          <span className="text-stone-400 text-[11px] font-mono-code">RESEARCH DOSSIER</span>
         </div>
-        <span className="text-[10px] text-stone-400 font-mono">वाचक दृश्य पूर्वावलोकन</span>
+        <span className="text-[10px] text-stone-400 font-mono-code">VERIFIED DOSSIER PREVIEW</span>
       </div>
 
       {/* Accent Ribbon */}

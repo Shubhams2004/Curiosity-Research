@@ -67,8 +67,8 @@ export const ALL_CATEGORIES: Category[] = [
   {
     slug: 'editorial',
     nameMarathi: 'संपादकीय',
-    nameEnglish: 'Editorial & Opinion',
-    description: 'साप्ताहिक बहुमोल दृष्टिकोन, अभ्यासपूर्ण अग्रलेख, तज्ज्ञ विश्लेषक व वाचकांचे विचारमंथन',
+    nameEnglish: 'Editorial & Research Analysis',
+    description: 'संवाद संशोधन दृष्टिकोन, अभ्यासपूर्ण अग्रलेख, धोरणात्मक विश्लेषण व तज्ज्ञांचे विचारमंथन',
     accentColor: '#334155', // Editorial Slate
   },
 ];

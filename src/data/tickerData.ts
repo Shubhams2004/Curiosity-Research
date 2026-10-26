@@ -24,7 +24,7 @@ export const BREAKING_NEWS_ITEMS: BreakingItem[] = [
   },
   {
     id: 'b-4',
-    title: 'संपादकीय: बहुमोल विचार — निष्पक्ष पत्रकारिता आणि लोकशाही मूल्यांचे संवर्धन (मुख्य संपादक दिलीप सोनाळे).',
+    title: 'संपादकीय: संवाद मंच — निष्पक्ष माहिती बुद्धिमत्ता आणि लोकशाही मूल्यांचे संवर्धन (संपादकीय प्रमुख: Shubham Sonale).',
     timestamp: 'विशेष अग्रलेख',
     category: 'editorial',
     articleSlug: 'editorial-satya-nishpakshata-dilip-sonale',

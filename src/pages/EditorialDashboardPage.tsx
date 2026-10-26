@@ -460,14 +460,14 @@ export const EditorialDashboardPage: React.FC<EditorialDashboardPageProps> = ({
             <div className="inline-flex p-3 bg-red-100 dark:bg-red-950/60 rounded-full text-red-700 dark:text-red-400 mb-3">
               <Lock className="w-6 h-6" />
             </div>
-            <div className="text-xs uppercase tracking-widest font-bold text-red-700 mb-1">
-              बहुमोल समाज • अंतर्गत डेस्क
+            <div className="text-xs uppercase tracking-widest font-mono-code font-bold text-cyan-500 mb-1">
+              SAMVAD INTEL • RESTRICTED DESK
             </div>
-            <h1 className="font-serif text-2xl font-bold text-stone-900 dark:text-stone-100">
-              संपादकीय नियंत्रण कक्ष
+            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
+              संपादकीय नियंत्रण कक्ष (Editorial Desk)
             </h1>
             <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-              मुख्य संपादक: <strong className="text-stone-900 dark:text-stone-200">दिलीप सोनाळे</strong>
+              Intelligence Operations & Editorial Verification Desk
             </p>
           </div>
 

@@ -1,23 +1,31 @@
+/**
+ * @file App.tsx
+ * Samvad Intel - Multilingual Information Intelligence & Research Platform
+ * Entry routing and layout composition.
+ * Preserves all backend endpoints and editorial flows (/editorial-desk, /api/*)
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useRouter, navigateTo } from './utils/router';
 import { useReadingPreferences } from './utils/readingPreferences';
 import { getArticleBySlug, getArticleById } from './data/newsArticles';
 import { newsService } from './services/newsService';
 import { Article } from './types/news';
-import { TopHeader } from './components/common/TopHeader';
-import { BreakingTicker } from './components/common/BreakingTicker';
-import { Footer } from './components/common/Footer';
-import { SearchModal } from './components/common/SearchModal';
-import { HomePage } from './pages/HomePage';
-import { CategoryPage } from './pages/CategoryPage';
-import { ArticleDetailPage } from './pages/ArticleDetailPage';
-import { SearchResultsPage } from './pages/SearchResultsPage';
-import { AboutPage } from './pages/AboutPage';
-import { ContactPage } from './pages/ContactPage';
-import { EpaperPage } from './pages/EpaperPage';
-import { BookmarksPage } from './pages/BookmarksPage';
-import { NewsTimelinePage } from './pages/NewsTimelinePage';
+
+// New Samvad Intel UI Components
+import { TopNav } from './components/common/TopNav';
+import { IntelligenceFooter } from './components/common/IntelligenceFooter';
+import { IntelligenceSearchModal } from './components/common/IntelligenceSearchModal';
+import { IntelligenceStreamPage } from './pages/IntelligenceStreamPage';
+import { IntelligenceDossierPage } from './pages/IntelligenceDossierPage';
+import { IntelligenceCategoryPage } from './pages/IntelligenceCategoryPage';
+import { IntelligenceSearchPage } from './pages/IntelligenceSearchPage';
+import { ResearchDossierPage } from './pages/ResearchDossierPage';
+import { MethodologyPage } from './pages/MethodologyPage';
+import { SourceDirectoryPage } from './pages/SourceDirectoryPage';
+import { BriefingArchivesPage } from './pages/BriefingArchivesPage';
 import { EditorialDashboardPage } from './pages/EditorialDashboardPage';
+
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 
 export default function App() {
@@ -51,7 +59,7 @@ export default function App() {
       setArticleNotFound(false);
       let isMounted = true;
 
-      // 1. Dynamic API fetch first (by ID or slug)
+      // 1. Dynamic API fetch first from Cloudflare D1
       newsService
         .getArticleById(targetSlugOrId)
         .then((article) => {
@@ -106,13 +114,15 @@ export default function App() {
     }
   }, [route.page, route.params.slug, route.params.id]);
 
-  // Slug-based article navigation
+  // Routing Handlers
   const handleSelectArticle = (slugOrId: string) => {
     navigateTo(`#/article/${slugOrId}`);
   };
 
   const handleSelectCategory = (slug: string) => {
-    if (slug === 'editorial') {
+    if (slug === 'all') {
+      navigateTo('#/');
+    } else if (slug === 'editorial') {
       navigateTo('#/editorial');
     } else if (slug === 'editorial-desk' || slug === 'editorial_desk') {
       navigateTo('#/editorial-desk');
@@ -177,7 +187,7 @@ export default function App() {
           );
         }
         return (
-          <CategoryPage
+          <IntelligenceCategoryPage
             slug={route.params.slug || 'maharashtra'}
             onSelectArticle={handleSelectArticle}
             onNavigateHome={handleNavigateHome}
@@ -193,9 +203,9 @@ export default function App() {
 
         if (loadingArticle && !article) {
           return (
-            <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-stone-500 font-sans">
-              <div className="w-8 h-8 border-3 border-red-700 border-t-transparent rounded-full animate-spin mb-3" />
-              <p className="text-sm font-medium">बातमी उघडत आहे...</p>
+            <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-slate-400 font-mono-code text-xs">
+              <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-3" />
+              <p>Opening research dossier from edge node...</p>
             </div>
           );
         }
@@ -203,28 +213,28 @@ export default function App() {
         if (!article || articleNotFound) {
           return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto font-sans">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-950/50 rounded-full flex items-center justify-center mb-4 text-red-600 dark:text-red-400">
-                <AlertCircle className="w-8 h-8" />
+              <div className="w-14 h-14 bg-rose-950/40 border border-rose-800/80 rounded-2xl flex items-center justify-center mb-4 text-rose-400">
+                <AlertCircle className="w-7 h-7" />
               </div>
-              <h2 className="text-2xl font-serif font-bold text-stone-900 dark:text-stone-100 mb-2">
-                ही बातमी सध्या उपलब्ध नाही
+              <h2 className="text-xl font-bold text-white mb-2">
+                Intelligence Dossier Not Found
               </h2>
-              <p className="text-sm text-stone-600 dark:text-stone-400 mb-6 leading-relaxed">
-                सदर बातमी काढून टाकण्यात आली असावी किंवा अद्याप प्रसिद्ध झालेली नसावी. (This story is currently unavailable or has not been published.)
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                ही बातमी सध्या उपलब्ध नाही. (The requested intelligence record does not exist or has not been approved for public release.)
               </p>
               <button
                 onClick={handleNavigateHome}
-                className="px-5 py-2.5 bg-red-700 hover:bg-red-800 text-white rounded font-medium text-sm transition-colors cursor-pointer flex items-center gap-2"
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-lg font-mono-code font-bold text-xs transition-colors cursor-pointer flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                मुख्यपृष्ठावर परत जा
+                Return to Intelligence Wire
               </button>
             </div>
           );
         }
 
         return (
-          <ArticleDetailPage
+          <IntelligenceDossierPage
             article={article}
             onSelectArticle={handleSelectArticle}
             onSelectCategory={handleSelectCategory}
@@ -239,7 +249,7 @@ export default function App() {
 
       case 'search':
         return (
-          <SearchResultsPage
+          <IntelligenceSearchPage
             initialQuery={route.params.query || ''}
             onSelectArticle={handleSelectArticle}
             onNavigateHome={handleNavigateHome}
@@ -248,18 +258,18 @@ export default function App() {
 
       case 'about':
         return (
-          <AboutPage
+          <MethodologyPage
             onNavigateHome={handleNavigateHome}
             onNavigateContact={handleNavigateContact}
           />
         );
 
       case 'contact':
-        return <ContactPage onNavigateHome={handleNavigateHome} />;
+        return <SourceDirectoryPage onNavigateHome={handleNavigateHome} />;
 
       case 'epaper':
         return (
-          <EpaperPage
+          <BriefingArchivesPage
             onNavigateHome={handleNavigateHome}
             onSelectArticle={handleSelectArticle}
           />
@@ -267,7 +277,7 @@ export default function App() {
 
       case 'bookmarks':
         return (
-          <BookmarksPage
+          <ResearchDossierPage
             bookmarkedIds={bookmarks}
             onSelectArticle={handleSelectArticle}
             onRemoveBookmark={toggleBookmark}
@@ -275,17 +285,9 @@ export default function App() {
           />
         );
 
-      case 'timeline':
-        return (
-          <NewsTimelinePage
-            onNavigateHome={handleNavigateHome}
-            onSelectArticle={handleSelectArticle}
-          />
-        );
-
       case 'editorial':
         return (
-          <CategoryPage
+          <IntelligenceCategoryPage
             slug="editorial"
             onSelectArticle={handleSelectArticle}
             onNavigateHome={handleNavigateHome}
@@ -301,10 +303,11 @@ export default function App() {
           />
         );
 
+      case 'timeline':
       case 'home':
       default:
         return (
-          <HomePage
+          <IntelligenceStreamPage
             onSelectArticle={handleSelectArticle}
             onSelectCategory={handleSelectCategory}
             onNavigateEpaper={handleNavigateEpaper}
@@ -318,12 +321,12 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950 font-sans text-stone-900 dark:text-stone-100 transition-colors ${
+      className={`min-h-screen flex flex-col bg-slate-950 font-sans text-slate-100 transition-colors ${
         fontSize === 'lg' ? 'text-[17px]' : fontSize === 'sm' ? 'text-[14px]' : 'text-[15px]'
       }`}
     >
-      {/* 1. Broadsheet Newspaper Top Header */}
-      <TopHeader
+      {/* 1. Samvad Intel Global Top Navigation Bar */}
+      <TopNav
         currentCategorySlug={currentCategorySlug}
         isArticlePage={route.page === 'article'}
         onSelectCategory={handleSelectCategory}
@@ -343,27 +346,25 @@ export default function App() {
         bookmarksCount={bookmarks.length}
       />
 
-      {/* 2. Breaking Weekly Ticker (Hidden while reading an article for maximal screen space) */}
-      {route.page !== 'article' && <BreakingTicker onSelectArticle={handleSelectArticle} />}
-
-      {/* 3. Main Content View */}
+      {/* 2. Main Content View */}
       <main className="flex-1">{renderCurrentPage()}</main>
 
-      {/* 4. Global Search Modal */}
-      <SearchModal
+      {/* 3. Global Intelligence Search Modal (Cmd+K / Ctrl+K) */}
+      <IntelligenceSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectArticle={handleSelectArticle}
         onViewAllResults={handleViewAllResults}
       />
 
-      {/* 5. Newspaper Footer */}
-      <Footer
+      {/* 4. Samvad Intel Footer */}
+      <IntelligenceFooter
         onSelectCategory={handleSelectCategory}
         onNavigateHome={handleNavigateHome}
         onNavigateAbout={handleNavigateAbout}
         onNavigateContact={handleNavigateContact}
         onNavigateEpaper={handleNavigateEpaper}
+        onNavigateEditorialDesk={handleNavigateEditorialDesk}
       />
     </div>
   );

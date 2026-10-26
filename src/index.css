@@ -2,22 +2,22 @@
 
 @layer base {
   html {
-    font-family: 'Mukta', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Mukta', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     scroll-behavior: smooth;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Martel', 'Noto Serif Devanagari', Georgia, serif;
-    letter-spacing: -0.015em;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
-.font-headline {
-  font-family: 'Rozha One', 'Martel', serif;
+.font-editorial {
+  font-family: 'Newsreader', 'Mukta', Georgia, serif;
 }
 
-.font-editorial {
-  font-family: 'Noto Serif Devanagari', 'Martel', serif;
+.font-mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 /* Hide scrollbar utility */

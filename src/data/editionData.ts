@@ -6,17 +6,17 @@ export const CURRENT_WEEKLY_EDITION: WeeklyEdition = {
   issue: 42,
   dateRange: '१ ते ७ ऑक्टोबर २०२६',
   fullDateLabel: 'वर्ष ३ | अंक ४२ | गुरुवार, १ ते ७ ऑक्टोबर २०२६',
-  editorInChief: 'दिलीप सोनाळे',
-  rniRegistration: 'MAHMAR/2024/88921',
+  editorInChief: 'Shubham Sonale',
+  rniRegistration: 'INTEL/2026/88921',
   establishedYear: 2024,
-  headlineQuote: 'निष्पक्ष, निर्भीक आणि सडेतोड — महाराष्ट्राचा अग्रगण्य साप्ताहिक आवाज',
+  headlineQuote: 'Samvad Intel: Multilingual Information Intelligence & Verification Engine',
 };
 
 export const EDITORIAL_TEAM = {
   editorInChief: {
-    name: 'दिलीप सोनाळे',
-    role: 'मुख्य संपादक (Editor-in-Chief)',
-    experience: 'मराठी वृत्तपत्र व संशोधन पत्रकारितेतील प्रदीर्घ अनुभव',
+    name: 'Shubham Sonale',
+    role: 'Platform Creator & System Architect',
+    experience: 'Information Intelligence, Edge Distributed Architecture & Cross-Lingual Research',
   },
   residentEditors: [
     {
@@ -41,7 +41,7 @@ export const EDITORIAL_TEAM = {
     },
   ],
   headOffice: {
-    name: 'बहुमोल समाज वृत्तभवन',
+    name: 'Samvad Intel Research Hub',
     address: '५४०, सदाशिव पेठ, कुमठेकर मार्ग, पुणे - ४११०३०',
     phone: '+९१ २० २३४५ ६७८९ / ९८७६५ ४३२१०',
     email: 'editor@bahumolsamaj.com',

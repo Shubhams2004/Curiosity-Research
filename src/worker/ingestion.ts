@@ -69,6 +69,13 @@ export async function ingestFromSource(
     const items: ParsedFeedItem[] = parseFeedXml(xmlContent);
     result.fetchedCount = items.length;
 
+    // Prioritize newest stories first by publishedAt date
+    items.sort((a, b) => {
+      const timeA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const timeB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return timeB - timeA;
+    });
+
     // 3. Process each item (up to 25 most recent per feed to stay within free-tier compute)
     const recentItems = items.slice(0, 25);
 
@@ -248,10 +255,71 @@ export async function applyRetentionRules(
           AND updated_at < datetime('now', '-60 days')
       `)
       .run();
-    prunedCount = pruneRes.meta?.changes || 0;
+    // 3. Systematically prune obsolete legacy newspaper sources if any remain
+    try {
+      await db
+        .prepare(`
+          DELETE FROM stories
+          WHERE source_id IN ('src_sakal_mr', 'src_loksatta_mr', 'src_in_sakal', 'src_dd_mr', 'src_gov_mahanews', 'src_gov_pib_mr')
+        `)
+        .run();
+    } catch {}
   } catch (err) {
     console.warn('[Curiosity DB Retention] Safe retention cleanup note:', err);
   }
 
   return { archivedCount, prunedCount };
+}
+
+/**
+ * Remove old news on demand or schedule to maintain a fresh, latest intelligence feed.
+ * Allows specifying threshold in days (default: 14 days for unreviewed, 30 days for archived).
+ */
+export async function purgeOldNews(
+  db: Env['DB'],
+  daysThreshold: number = 14
+): Promise<{ deletedCount: number; message: string }> {
+  let totalDeleted = 0;
+
+  try {
+    // Delete old unreviewed incoming news older than daysThreshold
+    const res1 = await db
+      .prepare(`
+        DELETE FROM stories
+        WHERE status = 'incoming'
+          AND (is_edited IS NULL OR is_edited = 0)
+          AND created_at < datetime('now', '-' || ? || ' days')
+      `)
+      .bind(daysThreshold)
+      .run();
+    totalDeleted += res1.meta?.changes || 0;
+
+    // Delete old rejected or archived news older than daysThreshold
+    const res2 = await db
+      .prepare(`
+        DELETE FROM stories
+        WHERE status IN ('rejected', 'archived')
+          AND (is_edited IS NULL OR is_edited = 0)
+          AND updated_at < datetime('now', '-' || ? || ' days')
+      `)
+      .bind(daysThreshold)
+      .run();
+    totalDeleted += res2.meta?.changes || 0;
+
+    // Purge any residual obsolete newspaper stories
+    const res3 = await db
+      .prepare(`
+        DELETE FROM stories
+        WHERE source_id IN ('src_sakal_mr', 'src_loksatta_mr', 'src_in_sakal', 'src_dd_mr', 'src_gov_mahanews', 'src_gov_pib_mr')
+      `)
+      .run();
+    totalDeleted += res3.meta?.changes || 0;
+  } catch (err) {
+    console.warn('[Curiosity Purge] Error purging old news:', err);
+  }
+
+  return {
+    deletedCount: totalDeleted,
+    message: `Purged ${totalDeleted} old/stale news records older than ${daysThreshold} days.`,
+  };
 }

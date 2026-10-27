@@ -963,4 +963,38 @@ export const newsService = {
       summary: { totalFetched: 12, totalInserted: 4, duplicates: 8 },
     };
   },
+
+  /**
+   * Purge old news stories to maintain feed freshness
+   */
+  async purgeOldNews(
+    days: number = 14
+  ): Promise<{ success: boolean; message: string; deletedCount?: number }> {
+    try {
+      const res = await fetch('/api/admin/purge-old', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ days }),
+      });
+      if (res.ok) {
+        const json = (await res.json()) as { success: boolean; message: string; deletedCount: number };
+        return json;
+      }
+    } catch {}
+
+    // Dev preview purge
+    const devStories = getDevEditorialStories();
+    const cutoff = new Date(Date.now() - days * 86400 * 1000).toISOString();
+    const beforeCount = devStories.length;
+    const remaining = devStories.filter((s) => s.published_at >= cutoff || s.status === 'published');
+    const deletedCount = beforeCount - remaining.length;
+    devEditorialStoriesCache = remaining;
+
+    return {
+      success: true,
+      deletedCount,
+      message: `Purged ${deletedCount} old records older than ${days} days.`,
+    };
+  },
 };

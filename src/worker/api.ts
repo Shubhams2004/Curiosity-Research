@@ -10,7 +10,7 @@
  */
 
 import { Env, StoryRow, StoryStatus, EditorialCounts, EditorialUpdatePayload } from './types';
-import { runIngestionPipeline, computeContentHash } from './ingestion';
+import { runIngestionPipeline, computeContentHash, purgeOldNews } from './ingestion';
 
 /**
  * Helper to build JSON responses with security and CORS headers
@@ -1054,6 +1054,26 @@ export async function handleApiRequest(request: Request, env: Env): Promise<Resp
         success: true,
         publishedCount: updateRes.meta.changes,
         message: `${updateRes.meta.changes} बातम्या प्रकाशित केल्या (Published stories)`,
+      });
+    }
+
+    // -----------------------------------------------------------
+    // POST /api/admin/purge-old
+    // Removes old/stale news records to maintain fresh discovery feed
+    // -----------------------------------------------------------
+    if (method === 'POST' && path === '/api/admin/purge-old') {
+      let days = 14;
+      try {
+        const body = (await request.json()) as { days?: number };
+        if (body && typeof body.days === 'number' && body.days > 0) {
+          days = Math.min(365, Math.max(1, body.days));
+        }
+      } catch {}
+
+      const purgeResult = await purgeOldNews(env.DB, days);
+      return jsonResponse({
+        success: true,
+        ...purgeResult,
       });
     }
 

@@ -1,17 +1,12 @@
 /**
  * @file TopNav.tsx
- * High-performance, clean intelligence platform navigation header for Samvad Intel.
- * Features:
- * - Real-time system status indicators (Edge D1 status, Verified wire, Ingestion sync)
- * - Quick search shortcut (Cmd+K / Ctrl+K)
- * - Topic exploration & dossier filters
- * - Source Transparency Directory link
- * - Workspace / Editorial link with security indicator
- * - Language filter & Reading / Theme controls
+ * Navigation header for Curiosity Research - Global Science & Technology Discovery Platform.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  */
 
 import React, { useState, useEffect } from 'react';
-import { ALL_CATEGORIES } from '../../data/categories';
+import { SCIENTIFIC_DOMAINS } from '../../data/categories';
 import { FontSizeOption } from '../../utils/readingPreferences';
 import { ThemeMode } from '../../types/news';
 import {
@@ -21,18 +16,16 @@ import {
   X,
   Sun,
   Moon,
-  ShieldCheck,
-  Activity,
-  Layers,
-  Database,
-  Globe2,
-  FileText,
+  Atom,
+  Building2,
   Compass,
   ArrowLeft,
-  ChevronRight,
-  ExternalLink,
-  SlidersHorizontal,
+  ChevronDown,
   Lock,
+  Layers,
+  Sparkles,
+  BookOpen,
+  Info,
 } from 'lucide-react';
 
 interface TopNavProps {
@@ -45,9 +38,9 @@ interface TopNavProps {
   onNavigateTimeline?: () => void;
   onNavigateEditorial?: () => void;
   onNavigateEditorialDesk?: () => void;
-  onNavigateEpaper: () => void; // Used for "Intelligence Briefings & Reports"
-  onNavigateAbout: () => void;  // Used for "Methodology & Architecture"
-  onNavigateContact: () => void;// Used for "Source Disclosure & Contact"
+  onNavigateEpaper: () => void; // Used for "Monthly Research Briefings"
+  onNavigateAbout: () => void;  // Used for "About & Methodology"
+  onNavigateContact: () => void;// Used for "Institutions & Sources Directory"
   fontSize: FontSizeOption;
   onChangeFontSize: (size: FontSizeOption) => void;
   theme: ThemeMode;
@@ -62,7 +55,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   onOpenSearch,
   onNavigateHome,
   onNavigateBookmarks,
-  onNavigateEditorial,
   onNavigateEditorialDesk,
   onNavigateEpaper,
   onNavigateAbout,
@@ -74,6 +66,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   bookmarksCount,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDisciplinesOpen, setIsDisciplinesOpen] = useState(false);
   const [isScrolledDown, setIsScrolledDown] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -107,45 +100,53 @@ export const TopNav: React.FC<TopNavProps> = ({
   const isCompact = isArticlePage || isScrolledDown;
 
   return (
-    <header className="w-full bg-slate-950/90 dark:bg-slate-950/95 backdrop-blur-md text-slate-200 border-b border-slate-800/80 sticky top-0 z-40 transition-all duration-200">
-      {/* 1. Global Utility & Telemetry Status Bar (Collapsed in compact mode) */}
+    <header className="w-full bg-slate-950/95 backdrop-blur-md text-slate-200 border-b border-slate-800/80 sticky top-0 z-40 transition-all duration-200">
+      {/* 1. Global Science Platform Bar */}
       {!isCompact && (
-        <div className="hidden md:flex items-center justify-between px-4 lg:px-8 py-1.5 bg-slate-900/60 border-b border-slate-800/50 text-xs font-mono-code text-slate-400">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              EDGE NODE: ASIA-SOUTH1
+        <div className="hidden md:flex items-center justify-between px-4 lg:px-8 py-1.5 bg-slate-900/70 border-b border-slate-800/60 text-xs font-mono text-slate-400">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center gap-1.5 text-cyan-400 font-semibold tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              CURIOSITY RESEARCH
             </span>
-            <span className="text-slate-600">|</span>
-            <span className="flex items-center gap-1 text-slate-300">
-              <Database className="w-3 h-3 text-cyan-400" />
-              D1 CLUSTER: VERIFIED
+            <span className="text-slate-700">|</span>
+            <span className="text-slate-300 italic">Discover What’s Next.</span>
+            <span className="text-slate-700">|</span>
+            <span className="text-slate-400">
+              Platform by <strong className="text-slate-200 font-medium">Shubham Sonale</strong>
             </span>
-            <span className="text-slate-600">|</span>
-            <span className="text-slate-400">INGESTION: CRON 30M ACTIVE</span>
           </div>
 
           <div className="flex items-center gap-4">
             <button
-              onClick={onNavigateAbout}
+              onClick={onNavigateContact}
               className="hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <ShieldCheck className="w-3 h-3 text-cyan-400" />
-              Methodology & Sources
+              <Building2 className="w-3 h-3 text-cyan-400" />
+              Institutions & Sources
             </button>
-            <span className="text-slate-600">|</span>
+            <span className="text-slate-700">|</span>
             <button
               onClick={onNavigateEpaper}
               className="hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <FileText className="w-3 h-3 text-amber-400" />
-              Intelligence Briefings
+              <BookOpen className="w-3 h-3 text-amber-400" />
+              Monthly Briefings
             </button>
-            <span className="text-slate-600">|</span>
+            <span className="text-slate-700">|</span>
+            <button
+              onClick={onNavigateAbout}
+              className="hover:text-cyan-300 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Info className="w-3 h-3 text-emerald-400" />
+              About & Methodology
+            </button>
+            <span className="text-slate-700">|</span>
             {onNavigateEditorialDesk && (
               <button
                 onClick={onNavigateEditorialDesk}
                 className="hover:text-amber-300 transition-colors flex items-center gap-1 text-slate-400 hover:text-amber-200 cursor-pointer"
+                title="Peer-Review & Publishing Newsroom"
               >
                 <Lock className="w-3 h-3 text-amber-500" />
                 Editorial Desk
@@ -156,16 +157,18 @@ export const TopNav: React.FC<TopNavProps> = ({
       )}
 
       {/* 2. Main Platform Header Bar */}
-      <div className={`px-4 lg:px-8 mx-auto flex items-center justify-between gap-3 transition-all ${
-        isCompact ? 'h-13' : 'h-15'
-      }`}>
-        {/* Left: Product Identity & Logo */}
+      <div
+        className={`px-4 lg:px-8 mx-auto flex items-center justify-between gap-3 transition-all ${
+          isCompact ? 'h-13' : 'h-16'
+        }`}
+      >
+        {/* Left: Product Identity & Brand */}
         <div className="flex items-center gap-3 shrink-0">
           {isArticlePage && (
             <button
               onClick={onNavigateHome}
               className="p-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors cursor-pointer mr-1"
-              title="Return to Intelligence Stream"
+              title="Return to Discovery Feed"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -176,45 +179,106 @@ export const TopNav: React.FC<TopNavProps> = ({
             className="flex items-center gap-2.5 cursor-pointer group select-none"
           >
             {/* Visual Brand Mark */}
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-950/50 border border-cyan-400/30 group-hover:border-cyan-300 transition-all">
-              <Activity className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-950/50 border border-cyan-400/30 group-hover:border-cyan-300 transition-all">
+              <Atom className="w-4.5 h-4.5 text-white animate-spin-slow" />
             </div>
 
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-cyan-300 transition-colors">
-                  SAMVAD
+                  CURIOSITY
                 </span>
-                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono-code font-bold uppercase bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
-                  INTEL
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold uppercase bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
+                  RESEARCH
                 </span>
               </div>
               {!isCompact && (
-                <p className="text-[10px] text-slate-400 tracking-wider font-mono-code -mt-0.5 hidden sm:block">
-                  INFORMATION INTELLIGENCE & RESEARCH
+                <p className="text-[10px] text-slate-400 tracking-wider font-mono -mt-0.5 hidden sm:block">
+                  DISCOVER WHAT’S NEXT • GLOBAL SCIENCE & TECH
                 </p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Center: Search & Topic Quick Filters (Desktop) */}
-        <div className="hidden lg:flex items-center gap-2 max-w-md w-full mx-4">
+        {/* Center: Search & Navigation Tabs (Desktop) */}
+        <div className="hidden lg:flex items-center gap-4 flex-1 max-w-xl mx-4">
           <button
             onClick={onOpenSearch}
-            className="w-full flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 hover:bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700 rounded-lg text-xs font-mono-code transition-all cursor-pointer shadow-inner"
+            className="flex-1 flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 hover:bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 hover:border-slate-700 rounded-lg text-xs font-mono transition-all cursor-pointer shadow-inner"
           >
-            <span className="flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Query intelligence, sources, topics...</span>
+            <span className="flex items-center gap-2 truncate">
+              <Search className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span>Search papers, DOIs, institutions, topics...</span>
             </span>
-            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 border border-slate-700">
+            <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 border border-slate-700 shrink-0 ml-2">
               ⌘K
             </kbd>
           </button>
+
+          {/* Quick Nav Links */}
+          <nav className="flex items-center gap-1 text-xs font-medium text-slate-300 shrink-0">
+            <button
+              onClick={onNavigateHome}
+              className={`px-2.5 py-1.5 rounded-md transition-colors cursor-pointer ${
+                !currentCategorySlug
+                  ? 'bg-cyan-500/10 text-cyan-300 font-semibold border border-cyan-500/20'
+                  : 'hover:bg-slate-900 hover:text-white'
+              }`}
+            >
+              Feed
+            </button>
+
+            <button
+              onClick={onNavigateContact}
+              className="px-2.5 py-1.5 rounded-md hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
+            >
+              Institutions
+            </button>
+
+            {/* Disciplines dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDisciplinesOpen(!isDisciplinesOpen)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-md hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
+              >
+                <span>Disciplines</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {isDisciplinesOpen && (
+                <div
+                  className="absolute left-0 mt-2 w-64 bg-slate-900/95 backdrop-blur-lg border border-slate-800 rounded-xl shadow-2xl p-2 z-50 grid grid-cols-1 gap-1"
+                  onMouseLeave={() => setIsDisciplinesOpen(false)}
+                >
+                  <div className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 border-b border-slate-800 mb-1">
+                    Research Disciplines
+                  </div>
+                  {SCIENTIFIC_DOMAINS.map((domain) => (
+                    <button
+                      key={domain.slug}
+                      onClick={() => {
+                        onSelectCategory(domain.slug);
+                        setIsDisciplinesOpen(false);
+                      }}
+                      className="w-full text-left px-2.5 py-1.5 text-xs rounded-lg hover:bg-slate-800/80 transition-colors flex items-center justify-between group cursor-pointer"
+                    >
+                      <span className="text-slate-300 group-hover:text-cyan-300">
+                        {domain.nameEnglish}
+                      </span>
+                      <span
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: domain.accentColor }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </nav>
         </div>
 
-        {/* Right: Actions, Font control, Theme, Dossier / Bookmarks, Mobile Trigger */}
+        {/* Right: Actions, Font control, Theme, Workstation, Mobile Trigger */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Quick Search on Mobile */}
           <button
@@ -225,225 +289,234 @@ export const TopNav: React.FC<TopNavProps> = ({
             <Search className="w-4 h-4 text-cyan-400" />
           </button>
 
-          {/* Saved Dossiers / Bookmarks */}
+          {/* Research Workstation / Saved Papers */}
           <button
             onClick={onNavigateBookmarks}
             className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 text-xs font-medium transition-colors cursor-pointer"
-            title="Saved Dossiers"
+            title="Personal Research Workstation"
           >
             <Bookmark className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">Dossier</span>
+            <span className="hidden sm:inline">Workstation</span>
             {bookmarksCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono-code font-bold bg-cyan-600 text-white">
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-cyan-600 text-white">
                 {bookmarksCount}
               </span>
             )}
           </button>
 
-          {/* Reading Font Size Toggle */}
-          <div className="hidden sm:flex items-center bg-slate-900 rounded-lg border border-slate-800 p-0.5 text-xs font-mono-code">
+          {/* Font Size Adjuster (sm / md / lg) */}
+          <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs font-mono">
             <button
               onClick={() => onChangeFontSize('sm')}
-              className={`px-2 py-1 rounded cursor-pointer transition-colors ${
-                fontSize === 'sm' ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-800/80' : 'text-slate-400 hover:text-white'
+              className={`px-1.5 py-0.5 rounded transition-colors ${
+                fontSize === 'sm'
+                  ? 'bg-cyan-600 text-white font-bold'
+                  : 'text-slate-400 hover:text-white'
               }`}
-              title="Compact typography"
+              title="Small text"
             >
               A-
             </button>
             <button
               onClick={() => onChangeFontSize('md')}
-              className={`px-2 py-1 rounded cursor-pointer transition-colors ${
-                fontSize === 'md' ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-800/80' : 'text-slate-400 hover:text-white'
+              className={`px-1.5 py-0.5 rounded transition-colors ${
+                fontSize === 'md'
+                  ? 'bg-cyan-600 text-white font-bold'
+                  : 'text-slate-400 hover:text-white'
               }`}
-              title="Standard typography"
+              title="Normal text"
             >
               A
             </button>
             <button
               onClick={() => onChangeFontSize('lg')}
-              className={`px-2 py-1 rounded cursor-pointer transition-colors ${
-                fontSize === 'lg' ? 'bg-cyan-950 text-cyan-300 font-bold border border-cyan-800/80' : 'text-slate-400 hover:text-white'
+              className={`px-1.5 py-0.5 rounded transition-colors ${
+                fontSize === 'lg'
+                  ? 'bg-cyan-600 text-white font-bold'
+                  : 'text-slate-400 hover:text-white'
               }`}
-              title="Enlarged typography"
+              title="Large text"
             >
               A+
             </button>
           </div>
 
-          {/* Theme Mode Toggle */}
+          {/* Theme Toggle */}
           <button
             onClick={onToggleTheme}
-            className="p-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-lg transition-colors cursor-pointer"
-            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            className="p-2 text-slate-300 hover:text-amber-300 bg-slate-900 border border-slate-800 rounded-lg transition-colors cursor-pointer"
+            title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            aria-label="Toggle Theme"
           >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-cyan-400" />}
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-indigo-400" />
+            )}
           </button>
 
-          {/* Mobile Navigation Drawer Trigger */}
+          {/* Mobile Menu Toggle */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-slate-300 hover:text-white bg-slate-900 border border-slate-800 rounded-lg transition-colors cursor-pointer"
-            aria-label="Navigation Menu"
+            className="lg:hidden p-2 text-slate-300 hover:text-white bg-slate-900 border border-slate-800 rounded-lg transition-colors cursor-pointer"
+            aria-label="Open Navigation Menu"
           >
             {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* 3. Topic Exploration Filter Strip (Horizontally Scrollable) */}
-      {!isArticlePage && (
-        <div className="bg-slate-950 border-t border-slate-900 px-4 lg:px-8 py-2 overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-1.5 min-w-max text-xs">
-            <span className="flex items-center gap-1 text-[11px] font-mono-code uppercase text-slate-500 mr-2">
-              <Compass className="w-3 h-3 text-cyan-400" />
-              Topics:
-            </span>
+      {/* 3. Horizontal Scientific Domains Scrollbar */}
+      <div className="w-full bg-slate-950/90 border-t border-slate-900 px-4 lg:px-8 py-1.5 overflow-x-auto no-scrollbar flex items-center gap-1.5 text-xs whitespace-nowrap">
+        <button
+          onClick={() => onSelectCategory('all')}
+          className={`px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
+            !currentCategorySlug || currentCategorySlug === 'all'
+              ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm shadow-cyan-500/20'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+          }`}
+        >
+          All Breakthroughs
+        </button>
 
+        {SCIENTIFIC_DOMAINS.map((cat) => {
+          const isActive = currentCategorySlug === cat.slug;
+          return (
             <button
-              onClick={() => onSelectCategory('all')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer transition-all ${
-                !currentCategorySlug || currentCategorySlug === 'all'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                  : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800/60'
+              key={cat.slug}
+              onClick={() => onSelectCategory(cat.slug)}
+              className={`px-3 py-1 rounded-full font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                isActive
+                  ? 'bg-slate-800 text-cyan-300 font-semibold border border-cyan-500/40 shadow-inner'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
               }`}
             >
-              Live Intelligence (All)
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: cat.accentColor }}
+              />
+              <span>{cat.nameEnglish}</span>
             </button>
-
-            {ALL_CATEGORIES.map((cat) => {
-              const isActive = currentCategorySlug === cat.slug;
-              return (
-                <button
-                  key={cat.slug}
-                  onClick={() => onSelectCategory(cat.slug)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer transition-all flex items-center gap-1.5 ${
-                    isActive
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                      : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 border border-slate-800/60 hover:border-slate-700'
-                  }`}
-                >
-                  <span>{cat.nameEnglish}</span>
-                  <span className="text-[10px] opacity-70">({cat.nameMarathi})</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       {/* 4. Mobile Navigation Drawer */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 py-5 space-y-4 animate-in slide-in-from-top duration-200">
-          <div className="space-y-1">
-            <p className="text-[10px] font-mono-code uppercase text-slate-400 px-2 pb-1">
-              Platform Views
-            </p>
-            <button
-              onClick={() => {
-                onNavigateHome();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-200 hover:bg-slate-900 flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-400" />
-                Live Intelligence Stream
-              </span>
-              <ChevronRight className="w-4 h-4 text-slate-600" />
-            </button>
-            <button
-              onClick={() => {
-                onNavigateBookmarks();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-200 hover:bg-slate-900 flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <Bookmark className="w-4 h-4 text-cyan-400" />
-                Saved Research Dossiers
-              </span>
-              <span className="text-xs font-mono-code text-cyan-400 font-bold">{bookmarksCount}</span>
-            </button>
-            <button
-              onClick={() => {
-                onNavigateEpaper();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-200 hover:bg-slate-900 flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-amber-400" />
-                Periodic Intelligence Briefings
-              </span>
-              <ChevronRight className="w-4 h-4 text-slate-600" />
-            </button>
-            <button
-              onClick={() => {
-                onNavigateAbout();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-200 hover:bg-slate-900 flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                Methodology & Verification Framework
-              </span>
-              <ChevronRight className="w-4 h-4 text-slate-600" />
-            </button>
-            <button
-              onClick={() => {
-                onNavigateContact();
-                setIsMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-slate-200 hover:bg-slate-900 flex items-center justify-between"
-            >
-              <span className="flex items-center gap-2">
-                <Globe2 className="w-4 h-4 text-blue-400" />
-                Source Transparency & Disclosure
-              </span>
-              <ChevronRight className="w-4 h-4 text-slate-600" />
-            </button>
-          </div>
-
-          <div className="pt-3 border-t border-slate-900 space-y-2">
-            <p className="text-[10px] font-mono-code uppercase text-slate-400 px-2">
-              Topic Taxonomy
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {ALL_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.slug}
-                  onClick={() => {
-                    onSelectCategory(cat.slug);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="px-2.5 py-1.5 rounded bg-slate-900 text-left text-xs text-slate-300 hover:text-white border border-slate-800"
-                >
-                  <span className="font-semibold">{cat.nameEnglish}</span>
-                  <span className="block text-[10px] text-slate-500">{cat.nameMarathi}</span>
-                </button>
-              ))}
+        <div className="lg:hidden fixed inset-x-0 top-auto bg-slate-950/98 border-b border-slate-800 p-4 max-h-[85vh] overflow-y-auto z-50 shadow-2xl backdrop-blur-xl">
+          <div className="space-y-4">
+            {/* Quick creator info */}
+            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 text-xs">
+              <div className="font-bold text-white mb-0.5">Curiosity Research</div>
+              <div className="text-cyan-400 text-[11px] mb-1">Discover What’s Next.</div>
+              <div className="text-slate-400 text-[11px]">
+                Created by <strong className="text-slate-200">Shubham Sonale</strong>
+              </div>
             </div>
-          </div>
 
-          {onNavigateEditorialDesk && (
-            <div className="pt-3 border-t border-slate-900">
+            {/* Mobile Navigation Links */}
+            <div className="space-y-1 text-sm font-medium">
               <button
                 onClick={() => {
-                  onNavigateEditorialDesk();
+                  onNavigateHome();
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 rounded-md text-xs font-mono-code text-amber-400 bg-amber-950/30 border border-amber-900/50 flex items-center justify-between"
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-900 text-slate-200 flex items-center gap-2 cursor-pointer"
+              >
+                <Compass className="w-4 h-4 text-cyan-400" />
+                Discovery Magazine & Feed
+              </button>
+
+              <button
+                onClick={() => {
+                  onNavigateContact();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-900 text-slate-200 flex items-center gap-2 cursor-pointer"
+              >
+                <Building2 className="w-4 h-4 text-cyan-400" />
+                Research Institutions & Sources
+              </button>
+
+              <button
+                onClick={() => {
+                  onNavigateBookmarks();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-900 text-slate-200 flex items-center justify-between cursor-pointer"
               >
                 <span className="flex items-center gap-2">
-                  <Lock className="w-3.5 h-3.5" />
-                  Restricted Editorial Desk
+                  <Bookmark className="w-4 h-4 text-cyan-400" />
+                  Personal Workstation
                 </span>
-                <span className="text-[10px] uppercase font-bold">Staff Access</span>
+                {bookmarksCount > 0 && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-cyan-600 text-white font-mono">
+                    {bookmarksCount}
+                  </span>
+                )}
               </button>
+
+              <button
+                onClick={() => {
+                  onNavigateEpaper();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-900 text-slate-200 flex items-center gap-2 cursor-pointer"
+              >
+                <BookOpen className="w-4 h-4 text-amber-400" />
+                Monthly Research Briefings
+              </button>
+
+              <button
+                onClick={() => {
+                  onNavigateAbout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-900 text-slate-200 flex items-center gap-2 cursor-pointer"
+              >
+                <Info className="w-4 h-4 text-emerald-400" />
+                About & Methodology
+              </button>
+
+              {onNavigateEditorialDesk && (
+                <button
+                  onClick={() => {
+                    onNavigateEditorialDesk();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-900 text-amber-300 flex items-center gap-2 cursor-pointer"
+                >
+                  <Lock className="w-4 h-4 text-amber-400" />
+                  Editorial Desk (Publishing Pipeline)
+                </button>
+              )}
             </div>
-          )}
+
+            {/* Mobile Disciplines Grid */}
+            <div className="pt-3 border-t border-slate-800">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                Disciplines
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {SCIENTIFIC_DOMAINS.map((cat) => (
+                  <button
+                    key={cat.slug}
+                    onClick={() => {
+                      onSelectCategory(cat.slug);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="text-left px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs text-slate-300 hover:text-cyan-300 transition-colors flex items-center gap-2 cursor-pointer"
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: cat.accentColor }}
+                    />
+                    <span className="truncate">{cat.nameEnglish}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </header>

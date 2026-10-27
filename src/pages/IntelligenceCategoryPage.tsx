@@ -1,28 +1,24 @@
 /**
  * @file IntelligenceCategoryPage.tsx
- * Domain Topic Exploration Page for Samvad Intel.
- * Features:
- * - Direct D1 live feed for specific category / topic domain
- * - Statistical breakdowns & topic metadata
- * - Source and language filtering within the domain
- * - Fast transitions to full research dossiers
+ * Research Discipline Explorer Page for Curiosity Research.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  */
 
-import React, { useState, useEffect } from 'react';
-import { getCategoryBySlug } from '../data/categories';
-import { getArticlesByCategory, ARTICLES } from '../data/newsArticles';
-import { newsService } from '../services/newsService';
-import { Article } from '../types/news';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getCategoryBySlug, SCIENTIFIC_DOMAINS } from '../data/categories';
+import { newsService, TimelineStory } from '../services/newsService';
+import { ARTICLES } from '../data/newsArticles';
 import {
-  ChevronRight,
-  Clock,
+  Atom,
   ArrowLeft,
   Building2,
-  Compass,
-  Filter,
+  BookOpen,
   Bookmark,
-  ShieldCheck,
-  CheckCircle2,
+  Clock,
+  Sparkles,
+  ChevronRight,
+  Filter,
   Layers,
   ArrowUpRight,
 } from 'lucide-react';
@@ -38,202 +34,241 @@ export const IntelligenceCategoryPage: React.FC<IntelligenceCategoryPageProps> =
   onSelectArticle,
   onNavigateHome,
 }) => {
-  const category = getCategoryBySlug(slug);
-  const [filterLang, setFilterLang] = useState<'all' | 'mr' | 'hi' | 'en'>('all');
-  const [liveArticles, setLiveArticles] = useState<Article[] | null>(null);
+  const [stories, setStories] = useState<TimelineStory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedInstitution, setSelectedInstitution] = useState<string>('all');
+
+  const category = useMemo(() => getCategoryBySlug(slug) || {
+    slug,
+    nameEnglish: slug.charAt(0).toUpperCase() + slug.slice(1),
+    description: `Scientific research and discoveries in ${slug}.`,
+    accentColor: '#06b6d4',
+  }, [slug]);
 
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
-    if (category) {
-      newsService
-        .fetchPublishedFromApi(category.slug, 30)
-        .then((articles) => {
-          if (isMounted) {
-            if (articles && articles.length > 0) {
-              setLiveArticles(articles);
-            } else {
-              setLiveArticles(null);
-            }
-          }
-        })
-        .catch(() => {
-          if (isMounted) setLiveArticles(null);
-        })
-        .finally(() => {
-          if (isMounted) setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
+
+    newsService
+      .fetchTimelineStories({ category: slug, limit: 30 })
+      .then((res) => {
+        if (!isMounted) return;
+        if (res.stories && res.stories.length > 0) {
+          setStories(res.stories);
+        } else {
+          // Check static articles matching this category
+          const fallback = ARTICLES.filter((a) => a.category === slug).map((a) => ({
+            id: a.id,
+            source_id: 'editorial_archive',
+            source_name: a.primaryInstitution || a.author.name,
+            source_group: 'Scientific Journals',
+            source_url: `#/article/${a.slug}`,
+            source_guid: a.slug,
+            title: a.title,
+            description: a.excerpt,
+            content: a.content.join('\n\n'),
+            image_url: a.image,
+            author: a.author.name,
+            published_at: a.publishedAt,
+            category: a.category,
+            language: a.language || 'en',
+            status: 'published',
+            created_at: a.publishedAt,
+          }));
+          setStories(fallback);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        const fallback = ARTICLES.filter((a) => a.category === slug).map((a) => ({
+          id: a.id,
+          source_id: 'editorial_archive',
+          source_name: a.primaryInstitution || a.author.name,
+          source_group: 'Scientific Journals',
+          source_url: `#/article/${a.slug}`,
+          source_guid: a.slug,
+          title: a.title,
+          description: a.excerpt,
+          content: a.content.join('\n\n'),
+          image_url: a.image,
+          author: a.author.name,
+          published_at: a.publishedAt,
+          category: a.category,
+          language: a.language || 'en',
+          status: 'published',
+          created_at: a.publishedAt,
+        }));
+        setStories(fallback);
+        setLoading(false);
+      });
 
     return () => {
       isMounted = false;
     };
-  }, [category]);
+  }, [slug]);
 
-  if (!category) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center font-sans">
-        <h1 className="text-2xl font-bold text-white mb-2">Topic Domain Not Found</h1>
-        <p className="text-sm text-slate-400 mb-6">
-          The requested intelligence domain does not exist or has been relocated.
-        </p>
-        <button
-          onClick={onNavigateHome}
-          className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-mono-code text-xs font-bold rounded-lg cursor-pointer transition-colors"
-        >
-          Return to Intelligence Stream
-        </button>
-      </div>
-    );
-  }
+  // Extract institutions available in this discipline
+  const institutions = useMemo(() => {
+    const set = new Set<string>();
+    stories.forEach((s) => {
+      if (s.source_name) set.add(s.source_name);
+    });
+    return Array.from(set);
+  }, [stories]);
 
-  // Fallback to local data if live API returns null/empty
-  const rawArticles = liveArticles || getArticlesByCategory(category.slug);
-  const articles = rawArticles.filter((a) => {
-    if (filterLang === 'all') return true;
-    return (a.language || 'mr').toLowerCase() === filterLang;
-  });
+  const filteredStories = useMemo(() => {
+    if (selectedInstitution === 'all') return stories;
+    return stories.filter((s) => s.source_name === selectedInstitution);
+  }, [stories, selectedInstitution]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-20">
-      {/* 1. Header Banner with Topic Metadata */}
-      <section className="bg-slate-900/60 border-b border-slate-800/80 px-4 lg:px-8 py-8 sm:py-10">
+    <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans pb-20">
+      {/* Top Banner Header */}
+      <div className="w-full bg-slate-900/60 border-b border-slate-800/80 px-4 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto space-y-4">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs font-mono-code text-slate-500">
-            <button
-              onClick={onNavigateHome}
-              className="text-slate-400 hover:text-cyan-400 flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Intelligence Stream
-            </button>
-            <ChevronRight className="w-3 h-3 text-slate-600" />
-            <span className="text-cyan-400 uppercase font-bold">{category.nameEnglish}</span>
-          </div>
+          <button
+            onClick={onNavigateHome}
+            className="flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Discovery Wire</span>
+          </button>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-mono-code text-xs uppercase font-bold">
-                  INTELLIGENCE DOMAIN
-                </span>
-                <span className="text-xs font-mono-code text-slate-400">
-                  {category.nameMarathi}
+                <span
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: category.accentColor }}
+                />
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
+                  Research Discipline
                 </span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                {category.nameEnglish} Research Dossiers
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
+                {category.nameEnglish}
               </h1>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-slate-300 text-sm max-w-2xl leading-relaxed">
                 {category.description}
               </p>
             </div>
 
-            {/* Language filter for domain */}
-            <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1 text-xs font-mono-code shrink-0">
-              <span className="text-slate-500 px-2 text-[11px] uppercase">Language:</span>
-              <button
-                onClick={() => setFilterLang('all')}
-                className={`px-2.5 py-1 rounded cursor-pointer ${
-                  filterLang === 'all' ? 'bg-slate-800 text-white font-bold' : 'text-slate-400'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterLang('mr')}
-                className={`px-2.5 py-1 rounded cursor-pointer ${
-                  filterLang === 'mr' ? 'bg-slate-800 text-cyan-300 font-bold' : 'text-slate-400'
-                }`}
-              >
-                मराठी
-              </button>
-              <button
-                onClick={() => setFilterLang('hi')}
-                className={`px-2.5 py-1 rounded cursor-pointer ${
-                  filterLang === 'hi' ? 'bg-slate-800 text-cyan-300 font-bold' : 'text-slate-400'
-                }`}
-              >
-                हिन्दी
-              </button>
-              <button
-                onClick={() => setFilterLang('en')}
-                className={`px-2.5 py-1 rounded cursor-pointer ${
-                  filterLang === 'en' ? 'bg-slate-800 text-cyan-300 font-bold' : 'text-slate-400'
-                }`}
-              >
-                EN
-              </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono">
+                <div className="text-slate-400 text-[11px]">Indexed Research Dossiers</div>
+                <div className="text-xl font-bold text-white mt-0.5">{stories.length} Papers</div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 2. Grid of Dossiers */}
-      <main className="max-w-7xl mx-auto px-4 lg:px-8 pt-8">
-        {loading ? (
-          <div className="py-20 text-center font-mono-code text-xs text-slate-400 space-y-3">
-            <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p>Scanning domain records on edge D1 cluster...</p>
-          </div>
-        ) : articles.length === 0 ? (
-          <div className="p-12 text-center bg-slate-900/60 rounded-xl border border-slate-800 text-slate-400 space-y-3 max-w-lg mx-auto">
-            <Layers className="w-8 h-8 text-cyan-400 mx-auto" />
-            <h3 className="text-base font-bold text-white">No Dossiers In This Language Filter</h3>
-            <p className="text-xs leading-relaxed">
-              No verified records currently match the selected language filter for this topic domain.
-            </p>
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-6 space-y-6">
+        {/* Institution Filter bar */}
+        {institutions.length > 1 && (
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-mono pb-2">
+            <span className="text-slate-400 flex items-center gap-1 shrink-0">
+              <Building2 className="w-3.5 h-3.5 text-cyan-400" />
+              Filter by Hub:
+            </span>
             <button
-              onClick={() => setFilterLang('all')}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-mono-code rounded-lg transition-colors cursor-pointer"
+              onClick={() => setSelectedInstitution('all')}
+              className={`px-3 py-1 rounded-full cursor-pointer whitespace-nowrap transition-colors ${
+                selectedInstitution === 'all'
+                  ? 'bg-cyan-600 text-slate-950 font-bold'
+                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+              }`}
             >
-              Show All Languages
+              All Hubs ({stories.length})
             </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
-              <div
-                key={article.id}
-                onClick={() => onSelectArticle(article.slug || article.id)}
-                className="p-5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 rounded-xl cursor-pointer transition-all flex flex-col justify-between group"
+            {institutions.map((inst) => (
+              <button
+                key={inst}
+                onClick={() => setSelectedInstitution(inst)}
+                className={`px-3 py-1 rounded-full cursor-pointer whitespace-nowrap transition-colors ${
+                  selectedInstitution === inst
+                    ? 'bg-cyan-600 text-slate-950 font-bold'
+                    : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                }`}
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs font-mono-code text-slate-400">
-                    <span className="text-slate-400 font-semibold truncate max-w-[150px]">
-                      {article.author.name}
-                    </span>
-                    <span className="text-slate-500">
-                      {new Date(article.publishedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-slate-100 group-hover:text-cyan-300 transition-colors leading-snug line-clamp-2">
-                    {article.title}
-                  </h3>
-
-                  <p className="text-xs text-slate-400 font-editorial leading-relaxed line-clamp-3">
-                    {article.excerpt}
-                  </p>
-                </div>
-
-                <div className="mt-5 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono-code">
-                  <span className="text-[11px] text-slate-500 uppercase">
-                    LANG: {(article.language || 'mr').toUpperCase()}
-                  </span>
-                  <span className="text-cyan-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1 font-semibold text-[11px]">
-                    Examine <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              </div>
+                {inst}
+              </button>
             ))}
           </div>
         )}
-      </main>
+
+        {/* Stories Grid */}
+        {loading ? (
+          <div className="py-20 text-center text-slate-400 text-xs font-mono space-y-2">
+            <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
+            <p>Loading research publications...</p>
+          </div>
+        ) : filteredStories.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredStories.map((story) => (
+              <article
+                key={story.id}
+                onClick={() => onSelectArticle(story.source_guid || story.id)}
+                className="flex flex-col justify-between bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 group shadow-lg"
+              >
+                <div>
+                  {story.image_url ? (
+                    <div className="relative h-44 w-full overflow-hidden bg-slate-950">
+                      <img
+                        src={story.image_url}
+                        alt={story.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-24 w-full bg-slate-900 p-4 flex items-center justify-between border-b border-slate-800">
+                      <span className="text-xs font-mono text-cyan-400 font-bold uppercase">
+                        {category.nameEnglish}
+                      </span>
+                      <Atom className="w-5 h-5 text-slate-700" />
+                    </div>
+                  )}
+
+                  <div className="p-4 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                      <span className="flex items-center gap-1 text-slate-300">
+                        <Building2 className="w-3 h-3 text-cyan-400" />
+                        <span className="truncate max-w-[150px]">{story.source_name || 'Primary Lab'}</span>
+                      </span>
+                      <span>{new Date(story.published_at).toLocaleDateString()}</span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 leading-snug">
+                      {story.title}
+                    </h3>
+
+                    {story.description && (
+                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                        {story.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 pt-0">
+                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+                    <span>{story.author || 'Research Team'}</span>
+                    <span className="text-cyan-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      <span>View Dossier</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center text-slate-500 text-xs font-mono">
+            No research papers currently indexed in this discipline.
+          </div>
+        )}
+      </div>
     </div>
   );
 };

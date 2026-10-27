@@ -1,75 +1,150 @@
 import { Category, CategorySlug } from '../types/news';
 
-export const ALL_CATEGORIES: Category[] = [
+export const SCIENTIFIC_DOMAINS: Category[] = [
   {
-    slug: 'maharashtra',
-    nameMarathi: 'महाराष्ट्र',
-    nameEnglish: 'Maharashtra',
-    description: 'राज्यातील प्रमुख शहरे, ग्रामीण भाग, जलसंधारण आणि प्रशासकीय घडामोडींचे साप्ताहिक समालोचन',
-    accentColor: '#b91c1c', // Crimson
+    slug: 'space',
+    nameEnglish: 'Space & Astrophysics',
+    nameMarathi: 'अंतराळ व खगोलभौतिकी',
+    description: 'Planetary missions, deep heliosphere dynamics, cosmology, stellar evolution, and satellite instrumentation.',
+    accentColor: '#38bdf8', // Sky Blue
   },
   {
-    slug: 'desh',
-    nameMarathi: 'देश',
-    nameEnglish: 'National',
-    description: 'संसद, सर्वोच्च न्यायालय, राष्ट्रीय धोरणे आणि केंद्र शासनाच्या महत्त्वाच्या निर्णयांचा आढावा',
-    accentColor: '#c2410c', // Amber Saffron
+    slug: 'ai',
+    nameEnglish: 'AI & Computing',
+    nameMarathi: 'कृत्रिम बुद्धिमत्ता व संगणन',
+    description: 'Geometric deep learning, quantum algorithms, neural architectures, neuromorphic computing, and foundation models.',
+    accentColor: '#818cf8', // Indigo Violet
   },
   {
-    slug: 'world',
-    nameMarathi: 'जग',
-    nameEnglish: 'International',
-    description: 'जागतिक भू-राजकारण, आंतरराष्ट्रीय करार, जागतिक पर्यावरण व परदेशातील घडामोडी',
-    accentColor: '#1d4ed8', // Editorial Blue
+    slug: 'physics',
+    nameEnglish: 'Quantum & Physics',
+    nameMarathi: 'क्वांटम व भौतिकशास्त्र',
+    description: 'Condensed matter, topological materials, high-energy particle physics, superconducting superlattices, and relativity.',
+    accentColor: '#06b6d4', // Cyan
   },
   {
-    slug: 'politics',
-    nameMarathi: 'राजकारण',
-    nameEnglish: 'Politics',
-    description: 'राजकीय समीकरणे, पक्षीय धोरणे, आगामी निवडणुका आणि सखोल राजकीय विश्लेषण',
-    accentColor: '#991b1b', // Deep Red
+    slug: 'biology',
+    nameEnglish: 'Biology & Genomics',
+    nameMarathi: 'जैविकशास्त्र व जीनोमिक्स',
+    description: 'CRISPR gene editing, molecular biophysics, epigenetic plant traits, synthetic biology, and evolutionary dynamics.',
+    accentColor: '#10b981', // Emerald Green
   },
   {
-    slug: 'economy',
-    nameMarathi: 'अर्थव्यवस्था',
-    nameEnglish: 'Economy & Business',
-    description: 'कृषी बाजारभाव, महागाई, उद्योग, बँकिंग, स्टार्टअप्स आणि महाराष्ट्राची अर्थव्यवस्था',
-    accentColor: '#0f766e', // Deep Teal
+    slug: 'medicine',
+    nameEnglish: 'Medicine & Health',
+    nameMarathi: 'वैद्यकशास्त्र व आरोग्य',
+    description: 'CAR-T immunotherapy, mRNA lipid nanoparticles, neuro-degenerative therapies, precision oncology, and clinical trials.',
+    accentColor: '#f43f5e', // Rose
   },
   {
-    slug: 'education',
-    nameMarathi: 'शिक्षण',
-    nameEnglish: 'Education',
-    description: 'शालेय व उच्च शिक्षण, एमपीएससी-युपीएससी परीक्षा, कौशल्य विकास व शैक्षणिक धोरणे',
-    accentColor: '#047857', // Emerald
+    slug: 'chemistry',
+    nameEnglish: 'Chemistry & Materials',
+    nameMarathi: 'रसायनशास्त्र व पदार्थविज्ञान',
+    description: 'Heterogeneous catalysis, flow chemistry, metal-organic frameworks, polymer physics, and battery electrochemistry.',
+    accentColor: '#f59e0b', // Amber
   },
   {
-    slug: 'tech',
-    nameMarathi: 'विज्ञान-तंत्रज्ञान',
-    nameEnglish: 'Science & Tech',
-    description: 'इस्रो, सायबर सुरक्षा, कृत्रिम बुद्धिमत्ता, सौर ऊर्जा, कृषी तंत्रज्ञान व डिजिटल क्रांती',
-    accentColor: '#4338ca', // Indigo
+    slug: 'energy',
+    nameEnglish: 'Energy & Climate',
+    nameMarathi: 'ऊर्जा व पर्यावरण तंत्रज्ञान',
+    description: 'Direct seawater electrolysis, perovskite photovoltaics, green hydrogen, atmospheric carbon capture, and grid storage.',
+    accentColor: '#84cc16', // Lime
   },
   {
-    slug: 'sports',
-    nameMarathi: 'क्रीडा',
-    nameEnglish: 'Sports',
-    description: 'क्रिकेट, कबड्डी, कुस्ती, राष्ट्रीय क्रीडा स्पर्धा आणि महाराष्ट्रातील उदयोन्मुख खेळाडू',
-    accentColor: '#b45309', // Warm Bronze
+    slug: 'robotics',
+    nameEnglish: 'Robotics & Autonomy',
+    nameMarathi: 'रोबोटिक्स व स्वायत्त प्रणाली',
+    description: 'Bio-inspired quadruped locomotion, surgical robotic manipulators, autonomous aerospace navigation, and tactile sensing.',
+    accentColor: '#a855f7', // Purple
   },
   {
-    slug: 'entertainment',
-    nameMarathi: 'मनोरंजन',
-    nameEnglish: 'Arts & Culture',
-    description: 'मराठी रंगभूमी, साहित्य, चित्रपट, लोककला, संगीत आणि सांस्कृतिक उत्सव',
-    accentColor: '#be185d', // Wine Rose
+    slug: 'engineering',
+    nameEnglish: 'Advanced Engineering',
+    nameMarathi: 'प्रगत अभियांत्रिकी व नॅनो',
+    description: 'Semiconductor lithography, micro-electromechanical systems (MEMS), photonic waveguides, and structural metamaterials.',
+    accentColor: '#64748b', // Slate
+  },
+  {
+    slug: 'indian-innovation',
+    nameEnglish: 'Indian Innovation',
+    nameMarathi: 'भारतीय संशोधन व नवकल्पना',
+    description: 'Breakthrough publications and indigenous technologies emerging from IISc, TIFR, IITs, ISRO, CSIR, and NCBS.',
+    accentColor: '#f97316', // Saffron Orange
   },
   {
     slug: 'editorial',
-    nameMarathi: 'संपादकीय',
-    nameEnglish: 'Editorial & Research Analysis',
-    description: 'संवाद संशोधन दृष्टिकोन, अभ्यासपूर्ण अग्रलेख, धोरणात्मक विश्लेषण व तज्ज्ञांचे विचारमंथन',
-    accentColor: '#334155', // Editorial Slate
+    nameEnglish: 'Perspectives & Reviews',
+    nameMarathi: 'संपादकीय व संशोधन भाष्य',
+    description: 'Scientific commentary, methodological audits, peer analysis, science policy debates, and open-access advocacy.',
+    accentColor: '#0284c7', // Deep Cyan
+  },
+];
+
+// Combine scientific domains and legacy categories for backward compatibility
+export const ALL_CATEGORIES: Category[] = [
+  ...SCIENTIFIC_DOMAINS,
+  {
+    slug: 'tech',
+    nameEnglish: 'Science & Technology',
+    nameMarathi: 'विज्ञान-तंत्रज्ञान',
+    description: 'Comprehensive science, space, AI, and engineering discoveries.',
+    accentColor: '#0ea5e9',
+  },
+  {
+    slug: 'maharashtra',
+    nameEnglish: 'Maharashtra Research Hubs',
+    nameMarathi: 'महाराष्ट्र',
+    description: 'Scientific research across Pune, Mumbai, and regional Maharashtra institutions (TIFR, IITB, NCL, IUCAA).',
+    accentColor: '#b91c1c',
+  },
+  {
+    slug: 'desh',
+    nameEnglish: 'National Science Initiatives',
+    nameMarathi: 'देश',
+    description: 'Indian National Science Missions, Department of Science & Technology, and CSIR milestones.',
+    accentColor: '#c2410c',
+  },
+  {
+    slug: 'world',
+    nameEnglish: 'Global Scientific Frontier',
+    nameMarathi: 'जग',
+    description: 'International scientific breakthroughs from CERN, NASA, ESA, MIT, and Max Planck Society.',
+    accentColor: '#1d4ed8',
+  },
+  {
+    slug: 'economy',
+    nameEnglish: 'Deep Tech & Research Economy',
+    nameMarathi: 'अर्थव्यवस्था',
+    description: 'Deep-tech startups, R&D patent filings, venture science, and high-tech manufacturing economics.',
+    accentColor: '#0f766e',
+  },
+  {
+    slug: 'education',
+    nameEnglish: 'Academic & Doctoral Research',
+    nameMarathi: 'शिक्षण',
+    description: 'Doctoral research fellowships, Indian Institute of Science education, and STEM pedagogy.',
+    accentColor: '#047857',
+  },
+  {
+    slug: 'politics',
+    nameEnglish: 'Science Policy & Governance',
+    nameMarathi: 'राजकारण',
+    description: 'National quantum missions, semiconductor incentives, and intellectual property governance.',
+    accentColor: '#991b1b',
+  },
+  {
+    slug: 'sports',
+    nameEnglish: 'Biomechanics & Sports Science',
+    nameMarathi: 'क्रीडा',
+    description: 'Kinematics, athletic performance biometrics, physiological telemetry, and sports technology.',
+    accentColor: '#b45309',
+  },
+  {
+    slug: 'entertainment',
+    nameEnglish: 'Sci-Art & Scientific Visualizations',
+    nameMarathi: 'मनोरंजन',
+    description: 'Astrophotography, molecular animations, science communication, and generative visual simulations.',
+    accentColor: '#be185d',
   },
 ];
 

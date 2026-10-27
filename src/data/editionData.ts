@@ -4,46 +4,47 @@ export const CURRENT_WEEKLY_EDITION: WeeklyEdition = {
   id: 'vol-3-issue-42',
   volume: 3,
   issue: 42,
-  dateRange: '१ ते ७ ऑक्टोबर २०२६',
-  fullDateLabel: 'वर्ष ३ | अंक ४२ | गुरुवार, १ ते ७ ऑक्टोबर २०२६',
+  dateRange: 'October 2026 Edition',
+  fullDateLabel: 'Curiosity Research Volume III | October 2026',
   editorInChief: 'Shubham Sonale',
-  rniRegistration: 'INTEL/2026/88921',
+  rniRegistration: 'CURIO/2026/SCIENCE',
   establishedYear: 2024,
-  headlineQuote: 'Samvad Intel: Multilingual Information Intelligence & Verification Engine',
+  headlineQuote: 'Curiosity Research: Discover What’s Next — Global Science & Technology Platform',
 };
 
 export const EDITORIAL_TEAM = {
-  editorInChief: {
+  creator: {
     name: 'Shubham Sonale',
-    role: 'Platform Creator & System Architect',
-    experience: 'Information Intelligence, Edge Distributed Architecture & Cross-Lingual Research',
+    role: 'Creator & Lead System Architect',
+    experience: 'Information Intelligence, Edge Distributed Architecture & Scientific Discovery Systems',
+    email: 'shubhamsonale2004@gmail.com',
   },
-  residentEditors: [
+  researchBoard: [
     {
-      name: 'संजय कुलकर्णी',
-      role: 'विशेष राजकीय प्रतिनिधी व मंत्रालय ब्युरो',
-      location: 'मुंबई',
+      name: 'Dr. Ananya Sen',
+      role: 'Fellow, Condensed Matter & Quantum Physics',
+      location: 'IISc Bengaluru',
     },
     {
-      name: 'आनंद जोशी',
-      role: 'निवासी संपादक (पश्चिम महाराष्ट्र)',
-      location: 'पुणे',
+      name: 'Dr. Ramesh Kulkarni',
+      role: 'Senior Scientist, Biotechnology & Plant Genomics',
+      location: 'NCBS & CSIR-NCL Pune',
     },
     {
-      name: 'डॉ. अनिता देशपांडे',
-      role: 'स्तंभलेखक (विज्ञान व कृषी तंत्रज्ञान)',
-      location: 'पुणे/नाशिक',
+      name: 'Dr. K. S. Somnath',
+      role: 'Principal Investigator, Heliophysics & Space Systems',
+      location: 'ISRO SAC Bengaluru',
     },
     {
-      name: 'विकास कदम',
-      role: 'शिक्षण व रोजगार वार्ताहर',
-      location: 'छत्रपती संभाजीनगर',
+      name: 'Prof. Pratibha Sharma',
+      role: 'Chair, Sustainable Clean Energy & Hydrogen Engineering',
+      location: 'IIT Bombay',
     },
   ],
-  headOffice: {
-    name: 'Samvad Intel Research Hub',
-    address: '५४०, सदाशिव पेठ, कुमठेकर मार्ग, पुणे - ४११०३०',
-    phone: '+९१ २० २३४५ ६७८९ / ९८७६५ ४३२१०',
-    email: 'editor@bahumolsamaj.com',
+  researchHub: {
+    name: 'Curiosity Research Global Laboratory',
+    address: 'Curiosity Research Science & Innovation Hub, Bengaluru / Pune, India',
+    email: 'research@curiosityresearch.org',
+    creatorEmail: 'shubhamsonale2004@gmail.com',
   },
 };

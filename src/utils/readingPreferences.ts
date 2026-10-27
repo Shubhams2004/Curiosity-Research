@@ -4,6 +4,14 @@ import { EditionCity, ThemeMode } from '../types/news';
 export type FontSizeOption = 'sm' | 'md' | 'lg';
 
 const STORAGE_KEYS = {
+  FONT_SIZE: 'curiosity_font_size',
+  BOOKMARKS: 'curiosity_bookmarks',
+  EDITION: 'curiosity_edition',
+  THEME: 'curiosity_theme',
+};
+
+// Legacy keys fallback to ensure smooth user preference migration
+const LEGACY_KEYS = {
   FONT_SIZE: 'bahumol_font_size',
   BOOKMARKS: 'bahumol_bookmarks',
   EDITION: 'bahumol_edition',
@@ -13,12 +21,13 @@ const STORAGE_KEYS = {
 export const useReadingPreferences = () => {
   const [fontSize, setFontSizeState] = useState<FontSizeOption>('md');
   const [bookmarks, setBookmarksState] = useState<string[]>([]);
-  const [edition, setEditionState] = useState<EditionCity>('पुणे');
-  const [theme, setThemeState] = useState<ThemeMode>('light');
+  const [edition, setEditionState] = useState<EditionCity>('Bengaluru');
+  const [theme, setThemeState] = useState<ThemeMode>('dark'); // Dark mode by default for research workstation
 
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) as ThemeMode;
+      const savedTheme = (localStorage.getItem(STORAGE_KEYS.THEME) ||
+        localStorage.getItem(LEGACY_KEYS.THEME)) as ThemeMode;
       if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
         setThemeState(savedTheme);
         if (savedTheme === 'dark') {
@@ -27,24 +36,25 @@ export const useReadingPreferences = () => {
           document.documentElement.classList.remove('dark');
         }
       } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
-          setThemeState('dark');
-          document.documentElement.classList.add('dark');
-        }
+        // Default to dark mode for scientific workstation
+        setThemeState('dark');
+        document.documentElement.classList.add('dark');
       }
 
-      const savedFontSize = localStorage.getItem(STORAGE_KEYS.FONT_SIZE) as FontSizeOption;
+      const savedFontSize = (localStorage.getItem(STORAGE_KEYS.FONT_SIZE) ||
+        localStorage.getItem(LEGACY_KEYS.FONT_SIZE)) as FontSizeOption;
       if (savedFontSize && ['sm', 'md', 'lg'].includes(savedFontSize)) {
         setFontSizeState(savedFontSize);
       }
 
-      const savedBookmarks = localStorage.getItem(STORAGE_KEYS.BOOKMARKS);
+      const savedBookmarks =
+        localStorage.getItem(STORAGE_KEYS.BOOKMARKS) || localStorage.getItem(LEGACY_KEYS.BOOKMARKS);
       if (savedBookmarks) {
         setBookmarksState(JSON.parse(savedBookmarks));
       }
 
-      const savedEdition = localStorage.getItem(STORAGE_KEYS.EDITION) as EditionCity;
+      const savedEdition = (localStorage.getItem(STORAGE_KEYS.EDITION) ||
+        localStorage.getItem(LEGACY_KEYS.EDITION)) as EditionCity;
       if (savedEdition) {
         setEditionState(savedEdition);
       }
@@ -73,12 +83,11 @@ export const useReadingPreferences = () => {
     } catch {}
   };
 
-  const toggleBookmark = (articleIdOrSlug: string) => {
+  const toggleBookmark = (articleId: string) => {
     setBookmarksState((prev) => {
-      const exists = prev.includes(articleIdOrSlug);
-      const updated = exists
-        ? prev.filter((id) => id !== articleIdOrSlug)
-        : [...prev, articleIdOrSlug];
+      const updated = prev.includes(articleId)
+        ? prev.filter((id) => id !== articleId)
+        : [...prev, articleId];
       try {
         localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(updated));
       } catch {}
@@ -86,20 +95,16 @@ export const useReadingPreferences = () => {
     });
   };
 
-  const isBookmarked = (articleIdOrSlug: string): boolean => {
-    return bookmarks.includes(articleIdOrSlug);
-  };
+  const isBookmarked = (articleId: string) => bookmarks.includes(articleId);
 
-  const setEdition = (city: EditionCity) => {
-    setEditionState(city);
+  const setEdition = (newEdition: EditionCity) => {
+    setEditionState(newEdition);
     try {
-      localStorage.setItem(STORAGE_KEYS.EDITION, city);
+      localStorage.setItem(STORAGE_KEYS.EDITION, newEdition);
     } catch {}
   };
 
   return {
-    theme,
-    toggleTheme,
     fontSize,
     setFontSize,
     bookmarks,
@@ -107,5 +112,7 @@ export const useReadingPreferences = () => {
     isBookmarked,
     edition,
     setEdition,
+    theme,
+    toggleTheme,
   };
 };

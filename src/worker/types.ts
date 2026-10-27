@@ -1,6 +1,8 @@
 /**
  * @file types.ts
- * Cloudflare Worker and D1 Database Types for Bahumol Samaj Newsroom Ingestion Pipeline
+ * Cloudflare Worker and D1 Database Types for Curiosity Research
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  */
 
 import type { D1Database, Fetcher, ExecutionContext, ScheduledEvent } from '@cloudflare/workers-types';
@@ -31,7 +33,7 @@ export interface NewsSourceRow {
   language: string;
   default_category: string;
   active: number;
-  source_group: 'Indian News' | 'Government Sources' | 'International News' | string;
+  source_group: 'Scientific Journals' | 'Indian Research Institutions' | 'Preprint Repositories' | 'Technology Labs' | 'Indian News' | 'Government Sources' | 'International News' | string;
   last_fetched_at: string | null;
   created_at: string;
 }
@@ -60,6 +62,30 @@ export interface StoryRow {
   tags?: string | null;
   editorial_notes?: string | null;
   is_edited?: number;
+
+  // Scientific metadata fields
+  doi?: string | null;
+  journal_name?: string | null;
+  publication_year?: number | null;
+  primary_institution?: string | null;
+  institution_country?: string | null;
+  paper_url?: string | null;
+  citation_count?: number | null;
+  is_breakthrough?: number | null;
+  research_discipline?: string | null;
+}
+
+export interface ResearchInstitutionRow {
+  id: string;
+  name: string;
+  abbreviation: string | null;
+  city: string;
+  country: string;
+  focus_areas: string;
+  website: string | null;
+  established_year: number | null;
+  notable_breakthroughs?: string | null;
+  created_at: string;
 }
 
 export interface EditorialUpdatePayload {
@@ -67,11 +93,15 @@ export interface EditorialUpdatePayload {
   description?: string;
   content?: string;
   category?: string;
-  language?: 'mr' | 'hi' | 'en' | string;
+  language?: 'en' | 'mr' | 'hi' | string;
   image_url?: string;
   author?: string;
   tags?: string;
   editorial_notes?: string;
+  doi?: string;
+  journal_name?: string;
+  primary_institution?: string;
+  paper_url?: string;
 }
 
 export interface EditorialCounts {
@@ -101,9 +131,10 @@ export interface ParsedFeedItem {
   link: string;
   description?: string;
   content?: string;
-  imageUrl?: string;
+  pubDate?: string;
+  publishedAt?: string;
   author?: string;
-  publishedAt: string;
+  imageUrl?: string;
   categoryCandidate?: string;
 }
 
@@ -113,6 +144,7 @@ export interface IngestionResult {
   fetchedCount: number;
   insertedCount: number;
   duplicateCount: number;
+  skippedCount?: number;
   error?: string;
 }
 
@@ -124,4 +156,10 @@ export interface IngestionSummary {
   newStoriesInserted: number;
   duplicatesSkipped: number;
   details: IngestionResult[];
+  startedAt?: string;
+  completedAt?: string;
+  activeSources?: number;
+  results?: IngestionResult[];
 }
+
+export type PipelineSummary = IngestionSummary;

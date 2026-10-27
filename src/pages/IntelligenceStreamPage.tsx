@@ -1,24 +1,19 @@
 /**
  * @file IntelligenceStreamPage.tsx
- * Modern, high-performance information intelligence homepage for Samvad Intel.
- * Replaces the conventional newspaper homepage with an intelligence stream & research hub:
- * - Live D1 published intelligence wire (strictly read-only for public visitors)
- * - Multi-dimensional exploration: Topic Domains, Source Entities, Language (mr/hi/en)
- * - Source Transparency metadata (PIB, Sakaal, AIR, Lokmat, etc. with verified provenance)
- * - Fast research dossier creation & bookmarking
- * - Real-time edge status metrics & source transparency index
+ * Primary Science Magazine & Discovery Feed for Curiosity Research.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { newsService, TimelineStory, BackendSource } from '../services/newsService';
-import { ARTICLES } from '../data/newsArticles';
-import { ALL_CATEGORIES } from '../data/categories';
+import { ARTICLES, getLeadArticle } from '../data/newsArticles';
+import { SCIENTIFIC_DOMAINS, getCategoryBySlug } from '../data/categories';
+import { BREAKING_NEWS_ITEMS } from '../data/tickerData';
 import {
-  Activity,
-  Layers,
-  Database,
+  Atom,
   Building2,
-  Radio,
+  BookOpen,
   Globe,
   Filter,
   Search,
@@ -35,6 +30,11 @@ import {
   Sparkles,
   ArrowUpRight,
   Info,
+  Layers,
+  Cpu,
+  Telescope,
+  Dna,
+  Zap,
 } from 'lucide-react';
 
 interface IntelligenceStreamPageProps {
@@ -50,30 +50,40 @@ const SOURCE_GROUP_META: Record<
   string,
   { label: string; badgeClass: string; icon: React.ReactNode }
 > = {
-  'Government Sources': {
-    label: 'Verified Official',
-    badgeClass: 'bg-emerald-950/80 text-emerald-300 border-emerald-800/70',
-    icon: <Building2 className="w-3 h-3 text-emerald-400 inline mr-1" />,
+  'Scientific Journals': {
+    label: 'Peer-Reviewed Journal',
+    badgeClass: 'bg-cyan-950/80 text-cyan-300 border-cyan-800/70',
+    icon: <BookOpen className="w-3 h-3 text-cyan-400 inline mr-1" />,
   },
-  'Indian News': {
-    label: 'National Wire',
+  'Indian Research Institutions': {
+    label: 'Indian Research Hub',
     badgeClass: 'bg-amber-950/80 text-amber-300 border-amber-800/70',
-    icon: <Radio className="w-3 h-3 text-amber-400 inline mr-1" />,
+    icon: <Building2 className="w-3 h-3 text-amber-400 inline mr-1" />,
   },
-  'International News': {
-    label: 'Global Intelligence',
+  'Preprint Repositories': {
+    label: 'Open Preprint (arXiv)',
+    badgeClass: 'bg-emerald-950/80 text-emerald-300 border-emerald-800/70',
+    icon: <FileText className="w-3 h-3 text-emerald-400 inline mr-1" />,
+  },
+  'Technology Labs': {
+    label: 'Advanced Tech Lab',
+    badgeClass: 'bg-indigo-950/80 text-indigo-300 border-indigo-800/70',
+    icon: <Cpu className="w-3 h-3 text-indigo-400 inline mr-1" />,
+  },
+  'Government Sources': {
+    label: 'Official Science Mission',
     badgeClass: 'bg-sky-950/80 text-sky-300 border-sky-800/70',
     icon: <Globe className="w-3 h-3 text-sky-400 inline mr-1" />,
   },
 };
 
-// Fallback items if API is completely offline
+// Fallback items if API is completely empty
 const STATIC_FALLBACK_STORIES: TimelineStory[] = ARTICLES.map((a) => ({
   id: a.id,
-  source_id: 'editorial_office',
-  source_name: a.author.name || 'Verified Correspondent',
-  source_group: 'Government Sources',
-  source_url: `#/article/${a.slug}`,
+  source_id: 'curiosity_research_bureau',
+  source_name: a.primaryInstitution || a.author.name || 'Verified Research Group',
+  source_group: a.category === 'space' || a.category === 'physics' ? 'Indian Research Institutions' : 'Scientific Journals',
+  source_url: a.paperUrl || `#/article/${a.slug}`,
   source_guid: a.slug,
   title: a.title,
   description: a.excerpt,
@@ -82,7 +92,7 @@ const STATIC_FALLBACK_STORIES: TimelineStory[] = ARTICLES.map((a) => ({
   author: a.author.name,
   published_at: a.publishedAt,
   category: a.category,
-  language: a.language || 'mr',
+  language: a.language || 'en',
   status: 'published',
   created_at: a.publishedAt,
 }));
@@ -90,7 +100,6 @@ const STATIC_FALLBACK_STORIES: TimelineStory[] = ARTICLES.map((a) => ({
 export const IntelligenceStreamPage: React.FC<IntelligenceStreamPageProps> = ({
   onSelectArticle,
   onSelectCategory,
-  onNavigateEpaper,
   onNavigateContact,
   isBookmarked,
   onToggleBookmark,
@@ -98,533 +107,473 @@ export const IntelligenceStreamPage: React.FC<IntelligenceStreamPageProps> = ({
   const [stories, setStories] = useState<TimelineStory[]>([]);
   const [activeSources, setActiveSources] = useState<BackendSource[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'breakthroughs' | 'indian'>('all');
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string>('all');
+  const [selectedSourceGroup, setSelectedSourceGroup] = useState<string>('all');
+  const [copiedDoi, setCopiedDoi] = useState<string | null>(null);
 
-  // Filters
-  const [selectedGroup, setSelectedGroup] = useState<string>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
-  const [searchFilter, setSearchFilter] = useState<string>('');
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [totalCount, setTotalCount] = useState<number>(0);
+  const leadArticle = useMemo(() => getLeadArticle(), []);
 
-  // Load published stories from Cloudflare D1 API
-  const loadStories = useCallback(async (targetPage: number = 1) => {
+  const loadData = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-      const res = await newsService.fetchTimelineStories({
-        category: selectedCategory !== 'all' ? selectedCategory : undefined,
-        source_group: selectedGroup !== 'all' ? selectedGroup : undefined,
-        page: targetPage,
-        limit: 15,
-      });
+      const [storyResult, sourcesResult] = await Promise.all([
+        newsService.fetchTimelineStories({ limit: 40 }),
+        newsService.fetchActiveSources(),
+      ]);
 
-      if (res.stories && res.stories.length > 0) {
-        setStories(res.stories);
-        setTotalPages(res.totalPages);
-        setTotalCount(res.total);
+      if (storyResult.stories && storyResult.stories.length > 0) {
+        setStories(storyResult.stories);
       } else {
-        // Safe fallback only if DB is empty
-        let fallback = [...STATIC_FALLBACK_STORIES];
-        if (selectedCategory !== 'all') {
-          fallback = fallback.filter((s) => s.category === selectedCategory);
-        }
-        setStories(fallback);
-        setTotalPages(1);
-        setTotalCount(fallback.length);
+        setStories(STATIC_FALLBACK_STORIES);
       }
-    } catch (err) {
-      console.warn('[Samvad Intel] Falling back to verified local baseline:', err);
+
+      setActiveSources(sourcesResult);
+    } catch {
       setStories(STATIC_FALLBACK_STORIES);
-      setTotalPages(1);
-      setTotalCount(STATIC_FALLBACK_STORIES.length);
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, selectedGroup]);
-
-  // Load registered sources catalog for transparency widget
-  useEffect(() => {
-    newsService.fetchActiveSources().then((sources) => {
-      if (sources && sources.length > 0) {
-        setActiveSources(sources);
-      }
-    });
   }, []);
 
   useEffect(() => {
-    setPage(1);
-    loadStories(1);
-  }, [loadStories]);
+    loadData();
+  }, [loadData]);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    setPage(newPage);
-    loadStories(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleCopyDoi = (doi: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(doi);
+    setCopiedDoi(doi);
+    setTimeout(() => setCopiedDoi(null), 2000);
   };
 
-  // Filter stories client-side if language or search keyword entered
-  const displayedStories = stories.filter((s) => {
-    if (selectedLanguage !== 'all') {
-      const sLang = (s.language || 'mr').toLowerCase();
-      if (sLang !== selectedLanguage) return false;
-    }
-    if (searchFilter.trim()) {
-      const term = searchFilter.toLowerCase();
-      const matchTitle = (s.title || '').toLowerCase().includes(term);
-      const matchDesc = (s.description || '').toLowerCase().includes(term);
-      const matchSource = (s.source_name || '').toLowerCase().includes(term);
-      if (!matchTitle && !matchDesc && !matchSource) return false;
-    }
-    return true;
-  });
-
-  const featuredStory = displayedStories[0];
-  const regularStories = displayedStories.slice(1);
+  // Filtered stories based on discipline, tab, and source group
+  const filteredStories = useMemo(() => {
+    return stories.filter((story) => {
+      // 1. Discipline filter
+      if (selectedDiscipline !== 'all' && story.category !== selectedDiscipline) {
+        return false;
+      }
+      // 2. Source group filter
+      if (selectedSourceGroup !== 'all' && story.source_group !== selectedSourceGroup) {
+        return false;
+      }
+      // 3. Tab filter
+      if (activeTab === 'indian') {
+        const titleLower = story.title.toLowerCase();
+        const srcLower = (story.source_name || '').toLowerCase();
+        const descLower = (story.description || '').toLowerCase();
+        const isIndian =
+          story.source_group === 'Indian Research Institutions' ||
+          story.category === 'indian-innovation' ||
+          titleLower.includes('iisc') ||
+          titleLower.includes('isro') ||
+          titleLower.includes('tifr') ||
+          titleLower.includes('iit') ||
+          titleLower.includes('ncbs') ||
+          srcLower.includes('isro') ||
+          srcLower.includes('iisc') ||
+          descLower.includes('india') ||
+          descLower.includes('bengaluru') ||
+          descLower.includes('mumbai');
+        return isIndian;
+      }
+      return true;
+    });
+  }, [stories, selectedDiscipline, selectedSourceGroup, activeTab]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
-      {/* 1. Platform Mission & Live Wire Intelligence Header */}
-      <section className="bg-slate-900/60 border-b border-slate-800/80 px-4 lg:px-8 py-8 sm:py-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 text-xs font-mono-code">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                VERIFIED SOURCE INTELLIGENCE WIRE
-              </div>
-              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white">
-                Multilingual Information Intelligence & Research Stream
-              </h1>
-              <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
-                Aggregated, cross-verified, and cryptographically hashed intelligence briefs from official government gazettes, news desks, and regional bureaus across Marathi, Hindi, and English.
-              </p>
-            </div>
+    <div className="w-full min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
+      {/* 1. Breaking Breakthroughs Ticker Bar */}
+      <div className="w-full bg-slate-900/90 border-b border-slate-800/80 px-4 lg:px-8 py-2 overflow-hidden flex items-center gap-3">
+        <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 text-[11px] font-mono font-bold uppercase tracking-wider shrink-0">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          BREAKTHROUGHS
+        </span>
+        <div className="overflow-x-auto no-scrollbar flex items-center gap-6 text-xs whitespace-nowrap text-slate-300">
+          {BREAKING_NEWS_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onSelectArticle(item.articleSlug)}
+              className="hover:text-cyan-300 transition-colors flex items-center gap-2 cursor-pointer group"
+            >
+              <span className="text-cyan-400 font-mono text-[11px]">[{item.timestamp}]</span>
+              <span className="text-slate-300 group-hover:underline">{item.title}</span>
+              {item.doi && (
+                <span className="text-[10px] font-mono text-slate-400">DOI: {item.doi}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
 
-            {/* Quick Metrics Panel */}
-            <div className="grid grid-cols-3 gap-3 bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 sm:p-4 shrink-0 font-mono-code text-xs">
-              <div className="text-center sm:text-left">
-                <span className="text-[10px] text-slate-500 uppercase block">Active Wire</span>
-                <span className="text-base sm:text-lg font-bold text-white">{totalCount}</span>
-                <span className="text-[10px] text-emerald-400 block">D1 Published</span>
-              </div>
-              <div className="text-center sm:text-left border-x border-slate-800 px-3">
-                <span className="text-[10px] text-slate-500 uppercase block">Ingest Sources</span>
-                <span className="text-base sm:text-lg font-bold text-white">{activeSources.length || 7}</span>
-                <span className="text-[10px] text-cyan-400 block">Multilateral</span>
-              </div>
-              <div className="text-center sm:text-left">
-                <span className="text-[10px] text-slate-500 uppercase block">Verification</span>
-                <span className="text-base sm:text-lg font-bold text-emerald-400">100%</span>
-                <span className="text-[10px] text-slate-400 block">Curated</span>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-6 space-y-8">
+        {/* 2. Platform Hero Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-800/80">
+          <div>
+            <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono font-semibold uppercase tracking-wider mb-1">
+              <Atom className="w-4 h-4 text-cyan-400" />
+              <span>Open Science & Technology Discovery Engine</span>
             </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
+              Discover What’s Next.
+            </h1>
+            <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+              Curiosity Research bridges groundbreaking science journalism with primary peer-reviewed literature.
+              Tracking discoveries across Space, Quantum Physics, AI, Biotechnology, Medicine, Clean Energy, and Indian Research Institutions.
+            </p>
           </div>
 
-          {/* 2. Interactive Discovery Filters Strip */}
-          <div className="mt-8 pt-6 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-4">
-            {/* Source Group Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono-code">
-              <span className="text-slate-500 text-[11px] mr-1 uppercase flex items-center gap-1">
-                <Filter className="w-3 h-3 text-cyan-400" />
-                Provenance:
-              </span>
-              <button
-                onClick={() => setSelectedGroup('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all ${
-                  selectedGroup === 'all'
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                    : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                }`}
-              >
-                All Sources
-              </button>
-              {Object.entries(SOURCE_GROUP_META).map(([grp, meta]) => (
-                <button
-                  key={grp}
-                  onClick={() => setSelectedGroup(grp)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center ${
-                    selectedGroup === grp
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-xs'
-                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
-                >
-                  {meta.icon}
-                  {meta.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Language Selection & Local Search Filter */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs font-mono-code">
-                <button
-                  onClick={() => setSelectedLanguage('all')}
-                  className={`px-2 py-1 rounded cursor-pointer ${
-                    selectedLanguage === 'all'
-                      ? 'bg-slate-800 text-white font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  All Lang
-                </button>
-                <button
-                  onClick={() => setSelectedLanguage('mr')}
-                  className={`px-2 py-1 rounded cursor-pointer ${
-                    selectedLanguage === 'mr'
-                      ? 'bg-slate-800 text-cyan-300 font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Marathi Intelligence"
-                >
-                  मराठी
-                </button>
-                <button
-                  onClick={() => setSelectedLanguage('hi')}
-                  className={`px-2 py-1 rounded cursor-pointer ${
-                    selectedLanguage === 'hi'
-                      ? 'bg-slate-800 text-cyan-300 font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="Hindi Intelligence"
-                >
-                  हिन्दी
-                </button>
-                <button
-                  onClick={() => setSelectedLanguage('en')}
-                  className={`px-2 py-1 rounded cursor-pointer ${
-                    selectedLanguage === 'en'
-                      ? 'bg-slate-800 text-cyan-300 font-bold'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                  title="English Intelligence"
-                >
-                  EN
-                </button>
-              </div>
-
-              {/* In-feed quick search */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  placeholder="Filter stream..."
-                  className="pl-7 pr-3 py-1 bg-slate-900 border border-slate-800 text-xs rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono-code w-32 sm:w-44"
-                />
-                <Search className="w-3 h-3 text-slate-500 absolute left-2.5 top-2" />
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono">
+              <div className="text-slate-400 text-[11px]">Platform Architecture</div>
+              <div className="text-white font-bold">Created by Shubham Sonale</div>
+              <div className="text-emerald-400 text-[10px] flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                D1 Edge Node • Zero Paywalls
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* 3. Main Stream & Exploration Grid */}
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 pt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Feed Column (8 cols) */}
-          <div className="lg:col-span-8 space-y-6">
-            {loading ? (
-              <div className="py-20 text-center space-y-3 font-mono-code text-xs text-slate-400">
-                <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p>Retrieving verified intelligence records from Cloudflare D1...</p>
-              </div>
-            ) : displayedStories.length === 0 ? (
-              <div className="p-12 text-center bg-slate-900/60 rounded-xl border border-slate-800 text-slate-400 space-y-3">
-                <Info className="w-10 h-10 text-cyan-400 mx-auto" />
-                <h3 className="text-base font-bold text-white">No Matching Intelligence Found</h3>
-                <p className="text-xs max-w-sm mx-auto leading-relaxed">
-                  No verified items match your current filter parameters. Try resetting your domain or provenance filter.
-                </p>
-                <button
-                  onClick={() => {
-                    setSelectedCategory('all');
-                    setSelectedGroup('all');
-                    setSelectedLanguage('all');
-                    setSearchFilter('');
-                  }}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-mono-code rounded-lg transition-colors cursor-pointer"
+        {/* 3. Lead Magazine Feature Dossier */}
+        {leadArticle && (
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-6 lg:p-8 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7 space-y-4">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    LANDMARK DISCOVERY
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 uppercase">
+                    {leadArticle.category}
+                  </span>
+                  {leadArticle.journalName && (
+                    <span className="text-slate-400 flex items-center gap-1">
+                      <BookOpen className="w-3 h-3 text-cyan-400" />
+                      {leadArticle.journalName} ({leadArticle.publicationYear || 2026})
+                    </span>
+                  )}
+                </div>
+
+                <h2
+                  onClick={() => onSelectArticle(leadArticle.slug)}
+                  className="text-2xl sm:text-3xl font-extrabold text-white hover:text-cyan-300 transition-colors cursor-pointer leading-tight"
                 >
-                  Reset Filters
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Featured Intelligence Lead Dossier */}
-                {featuredStory && page === 1 && !searchFilter && (
-                  <div className="p-6 bg-gradient-to-b from-slate-900 to-slate-900/80 border border-slate-800 rounded-xl shadow-lg relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+                  {leadArticle.title}
+                </h2>
 
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono-code text-slate-400 mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/80 font-bold uppercase text-[10px]">
-                          LEAD DOSSIER
-                        </span>
-                        <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] uppercase">
-                          {featuredStory.category}
-                        </span>
-                        <span className="text-slate-500">
-                          {featuredStory.source_name || 'Official Gazette'}
-                        </span>
-                      </div>
+                <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                  {leadArticle.excerpt}
+                </p>
 
-                      <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
-                        <Clock className="w-3 h-3 text-cyan-400" />
-                        <span>{new Date(featuredStory.published_at).toLocaleString()}</span>
-                      </div>
-                    </div>
-
-                    <h2
-                      onClick={() => onSelectArticle(featuredStory.source_guid || featuredStory.id)}
-                      className="text-xl sm:text-2xl font-bold text-white hover:text-cyan-300 transition-colors cursor-pointer leading-snug"
+                <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-mono text-slate-400">
+                  {leadArticle.primaryInstitution && (
+                    <span className="flex items-center gap-1 text-slate-200">
+                      <Building2 className="w-3.5 h-3.5 text-cyan-400" />
+                      {leadArticle.primaryInstitution}
+                    </span>
+                  )}
+                  {leadArticle.doi && (
+                    <button
+                      onClick={(e) => handleCopyDoi(leadArticle.doi!, e)}
+                      className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+                      title="Click to copy DOI"
                     >
-                      {featuredStory.title}
-                    </h2>
+                      <span>DOI: {leadArticle.doi}</span>
+                      {copiedDoi === leadArticle.doi ? (
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      ) : (
+                        <span className="text-[10px] text-slate-400">Copy</span>
+                      )}
+                    </button>
+                  )}
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    {leadArticle.readTimeMinutes} min read
+                  </span>
+                </div>
 
-                    <p className="mt-3 text-sm text-slate-300 font-editorial leading-relaxed line-clamp-3">
-                      {featuredStory.description}
-                    </p>
+                <div className="pt-4 flex items-center gap-3">
+                  <button
+                    onClick={() => onSelectArticle(leadArticle.slug)}
+                    className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-lg transition-colors flex items-center gap-2 cursor-pointer shadow-lg shadow-cyan-950/50"
+                  >
+                    <span>Read Research Dossier</span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </button>
 
-                    <div className="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs font-mono-code text-slate-400">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Full Source Record Available</span>
+                  <button
+                    onClick={() => onToggleBookmark(leadArticle.id)}
+                    className={`p-2.5 rounded-lg border transition-colors cursor-pointer ${
+                      isBookmarked(leadArticle.id)
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                        : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+                    }`}
+                    title="Save to Workstation"
+                  >
+                    <Bookmark className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 relative">
+                <div
+                  onClick={() => onSelectArticle(leadArticle.slug)}
+                  className="overflow-hidden rounded-xl border border-slate-800 cursor-pointer group"
+                >
+                  <img
+                    src={leadArticle.image}
+                    alt={leadArticle.title}
+                    className="w-full h-64 sm:h-80 object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {leadArticle.imageCaption && (
+                    <div className="p-2.5 bg-slate-950/90 text-[11px] text-slate-400 border-t border-slate-800">
+                      {leadArticle.imageCaption}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* 4. Research Platform Metrics & Indian Innovation Banner */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+          <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div className="text-slate-400 text-[11px]">Primary Research Domains</div>
+            <div className="text-lg font-bold text-white mt-1">10 Disciplines</div>
+            <div className="text-cyan-400 text-[10px] mt-0.5">Space, Quantum, AI, Bio, Energy</div>
+          </div>
+          <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div className="text-slate-400 text-[11px]">Indian Institutions Indexed</div>
+            <div className="text-lg font-bold text-white mt-1">10 Premier Hubs</div>
+            <div className="text-emerald-400 text-[10px] mt-0.5">IISc, TIFR, ISRO, IITs, CSIR</div>
+          </div>
+          <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div className="text-slate-400 text-[11px]">Verification Pipeline</div>
+            <div className="text-lg font-bold text-white mt-1">100% Peer Traced</div>
+            <div className="text-amber-400 text-[10px] mt-0.5">DOI & Primary Provenance</div>
+          </div>
+          <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div className="text-slate-400 text-[11px]">Edge Ingestion Engine</div>
+            <div className="text-lg font-bold text-white mt-1">Automated 30M</div>
+            <div className="text-sky-400 text-[10px] mt-0.5">Cloudflare D1 SQLite Engine</div>
+          </div>
+        </div>
+
+        {/* 5. Stream Filter Controls & Navigation Tabs */}
+        <div className="space-y-3 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            {/* View Tabs */}
+            <div className="flex items-center gap-1.5 p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs font-medium">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                  activeTab === 'all'
+                    ? 'bg-cyan-600 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                All Publications
+              </button>
+              <button
+                onClick={() => setActiveTab('indian')}
+                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'indian'
+                    ? 'bg-amber-500 text-slate-950 font-bold'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <span>🇮🇳 Indian Research Hubs</span>
+              </button>
+            </div>
+
+            {/* Discipline Dropdown Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5 text-cyan-400" />
+                Discipline:
+              </span>
+              <select
+                value={selectedDiscipline}
+                onChange={(e) => setSelectedDiscipline(e.target.value)}
+                className="bg-slate-900 text-white text-xs border border-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-cyan-500 font-mono cursor-pointer"
+              >
+                <option value="all">All Disciplines (10)</option>
+                {SCIENTIFIC_DOMAINS.map((cat) => (
+                  <option key={cat.slug} value={cat.slug}>
+                    {cat.nameEnglish}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 6. Research Articles & Papers Grid */}
+        {loading ? (
+          <div className="py-20 text-center text-slate-400 text-xs font-mono space-y-3">
+            <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto" />
+            <p>Fetching peer-reviewed publications from Cloudflare D1...</p>
+          </div>
+        ) : filteredStories.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredStories.map((story) => {
+              const meta = SOURCE_GROUP_META[story.source_group || ''] || {
+                label: 'Verified Research Wire',
+                badgeClass: 'bg-slate-900 text-slate-300 border-slate-800',
+                icon: <Atom className="w-3 h-3 text-cyan-400 inline mr-1" />,
+              };
+
+              const catInfo = getCategoryBySlug(story.category);
+
+              return (
+                <article
+                  key={story.id}
+                  onClick={() => onSelectArticle(story.source_guid || story.id)}
+                  className="flex flex-col justify-between bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 rounded-xl overflow-hidden cursor-pointer transition-all duration-200 group shadow-lg"
+                >
+                  <div>
+                    {/* Thumbnail Image */}
+                    {story.image_url ? (
+                      <div className="relative h-44 w-full overflow-hidden bg-slate-950">
+                        <img
+                          src={story.image_url}
+                          alt={story.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-slate-950/80 backdrop-blur-md text-cyan-300 border border-slate-800">
+                            {catInfo?.nameEnglish || story.category}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-28 w-full bg-gradient-to-r from-slate-950 to-slate-900 p-4 flex items-center justify-between border-b border-slate-800">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-cyan-950 text-cyan-300 border border-cyan-800">
+                          {catInfo?.nameEnglish || story.category}
+                        </span>
+                        <Atom className="w-6 h-6 text-slate-700" />
+                      </div>
+                    )}
+
+                    {/* Content Section */}
+                    <div className="p-4 space-y-2">
+                      {/* Source & Provenance Badge */}
+                      <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                        <span
+                          className={`px-2 py-0.5 rounded-full border text-[10px] font-semibold flex items-center ${meta.badgeClass}`}
+                        >
+                          {meta.icon}
+                          <span className="truncate max-w-[140px]">{story.source_name || meta.label}</span>
+                        </span>
+                        <span className="text-slate-400">
+                          {new Date(story.published_at).toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      {/* Title */}
+                      <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 leading-snug">
+                        {story.title}
+                      </h3>
+
+                      {/* Excerpt */}
+                      {story.description && (
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                          {story.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className="p-4 pt-0">
+                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+                      <span className="text-slate-400 text-[11px]">
+                        By {story.author || 'Research Team'}
+                      </span>
+                      <div className="flex items-center gap-2">
                         <button
-                          onClick={() => onToggleBookmark(featuredStory.source_guid || featuredStory.id)}
-                          className={`p-1.5 rounded-lg border text-xs cursor-pointer transition-colors ${
-                            isBookmarked(featuredStory.source_guid || featuredStory.id)
-                              ? 'bg-cyan-950 text-cyan-300 border-cyan-700'
-                              : 'bg-slate-800 text-slate-400 hover:text-white border-slate-700'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleBookmark(story.id);
+                          }}
+                          className={`p-1.5 rounded hover:bg-slate-800 transition-colors cursor-pointer ${
+                            isBookmarked(story.id) ? 'text-cyan-400 font-bold' : 'text-slate-400'
                           }`}
-                          title="Save to Research Dossier"
+                          title="Save to Workstation"
                         >
                           <Bookmark className="w-3.5 h-3.5" />
                         </button>
-
-                        <button
-                          onClick={() => onSelectArticle(featuredStory.source_guid || featuredStory.id)}
-                          className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-lg text-xs font-bold font-mono-code flex items-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <span>Examine Dossier</span>
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
+                        <span className="text-cyan-400 group-hover:translate-x-0.5 transition-transform flex items-center">
+                          <ChevronRight className="w-4 h-4" />
+                        </span>
                       </div>
                     </div>
                   </div>
-                )}
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-20 text-center text-slate-500 text-xs font-mono">
+            No research papers found matching the selected filters.
+          </div>
+        )}
 
-                {/* Regular Intelligence Stream Cards */}
-                <div className="space-y-4">
-                  {(page === 1 && !searchFilter ? regularStories : displayedStories).map((story) => {
-                    const groupMeta =
-                      SOURCE_GROUP_META[story.source_group || ''] ||
-                      SOURCE_GROUP_META['Government Sources'];
-
-                    return (
-                      <article
-                        key={story.id}
-                        className="p-5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 rounded-xl transition-all group"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono-code text-slate-400 mb-2">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`px-2 py-0.5 rounded border text-[10px] font-semibold uppercase ${groupMeta.badgeClass}`}
-                            >
-                              {groupMeta.icon}
-                              {groupMeta.label}
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] uppercase">
-                              {story.category}
-                            </span>
-                            <span className="text-slate-400 font-semibold">
-                              {story.source_name || 'Verified Source'}
-                            </span>
-                          </div>
-
-                          <span className="text-slate-500 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-500" />
-                            {new Date(story.published_at).toLocaleDateString()}
-                          </span>
-                        </div>
-
-                        <h3
-                          onClick={() => onSelectArticle(story.source_guid || story.id)}
-                          className="text-base sm:text-lg font-bold text-slate-100 group-hover:text-cyan-300 transition-colors cursor-pointer leading-snug"
-                        >
-                          {story.title}
-                        </h3>
-
-                        <p className="mt-2 text-xs sm:text-sm text-slate-400 font-editorial leading-relaxed line-clamp-2">
-                          {story.description}
-                        </p>
-
-                        <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-mono-code">
-                          <div className="flex items-center gap-2 text-slate-500 text-[11px]">
-                            <span>LANG: {(story.language || 'mr').toUpperCase()}</span>
-                            <span>•</span>
-                            <span className="text-emerald-400/90 flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" />
-                              VERIFIED
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => onToggleBookmark(story.source_guid || story.id)}
-                              className={`p-1.5 rounded-md border text-xs cursor-pointer transition-colors ${
-                                isBookmarked(story.source_guid || story.id)
-                                  ? 'bg-cyan-950 text-cyan-300 border-cyan-700'
-                                  : 'bg-slate-950 text-slate-400 hover:text-white border-slate-800'
-                              }`}
-                              title="Add to Research Dossier"
-                            >
-                              <Bookmark className="w-3 h-3" />
-                            </button>
-
-                            <button
-                              onClick={() => onSelectArticle(story.source_guid || story.id)}
-                              className="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1"
-                            >
-                              <span>Read Dossier</span>
-                              <ChevronRight className="w-3 h-3 text-cyan-400" />
-                            </button>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono-code text-slate-400">
-                    <div>
-                      Page <span className="text-white font-bold">{page}</span> of{' '}
-                      <span className="text-white font-bold">{totalPages}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handlePageChange(page - 1)}
-                        disabled={page === 1}
-                        className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 cursor-pointer transition-colors"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => handlePageChange(page + 1)}
-                        disabled={page === totalPages}
-                        className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 cursor-pointer transition-colors"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+        {/* 7. Dedicated Indian Research Showcase */}
+        <section className="mt-12 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-amber-950/20 via-slate-900 to-cyan-950/20 border border-amber-900/40">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <div className="flex items-center gap-2 text-amber-400 text-xs font-mono font-bold uppercase tracking-wider mb-1">
+                <Building2 className="w-4 h-4 text-amber-400" />
+                <span>Premier Indian Research Ecosystem</span>
+              </div>
+              <h3 className="text-2xl font-extrabold text-white">
+                IISc, TIFR, ISRO, IITs & CSIR Innovations
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm mt-1">
+                Direct open discovery into India’s scientific breakthroughs, quantum technologies, and aerospace achievements.
+              </p>
+            </div>
+            <button
+              onClick={onNavigateContact}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-mono font-bold text-xs uppercase tracking-wider rounded-lg transition-colors cursor-pointer self-start md:self-auto flex items-center gap-1.5"
+            >
+              <span>Explore Institutions</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Right Rail: Research Tools & Source Transparency Catalog (4 cols) */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* 1. Source Transparency Index Widget */}
-            <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3 font-sans">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <h4 className="text-xs font-mono-code uppercase font-bold text-slate-200 flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-cyan-400" />
-                  Source Transparency Index
-                </h4>
-                <button
-                  onClick={onNavigateContact}
-                  className="text-[11px] font-mono-code text-cyan-400 hover:text-cyan-300"
-                >
-                  View All
-                </button>
-              </div>
-
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Samvad Intel indexes official government communication channels and peer-reviewed wire feeds. Raw incoming data is cryptographically staged before editorial approval.
-              </p>
-
-              <div className="space-y-2 pt-1">
-                {(activeSources.length > 0 ? activeSources.slice(0, 5) : [
-                  { id: 'src_pib_mr', name: 'पत्र सूचना कार्यालय (PIB Mumbai)', source_group: 'Government Sources', language: 'mr' },
-                  { id: 'src_pib_en', name: 'Press Information Bureau (PIB India)', source_group: 'Government Sources', language: 'en' },
-                  { id: 'src_sakal_mr', name: 'सकाळ वृत्तसेवा (Sakal Wire)', source_group: 'Indian News', language: 'mr' },
-                  { id: 'src_hindu_en', name: 'The Hindu National Wire', source_group: 'Indian News', language: 'en' },
-                  { id: 'src_air_mr', name: 'आकाशवाणी वृत्त (All India Radio)', source_group: 'Government Sources', language: 'mr' },
-                ]).map((src) => (
-                  <div
-                    key={src.id}
-                    className="p-2.5 rounded-lg bg-slate-950/70 border border-slate-800/80 flex items-center justify-between text-xs"
-                  >
-                    <div>
-                      <div className="font-semibold text-slate-200">{src.name}</div>
-                      <div className="text-[10px] font-mono-code text-slate-500">
-                        {src.source_group} · {(src.language || 'mr').toUpperCase()}
-                      </div>
-                    </div>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" title="Operational Feed" />
-                  </div>
-                ))}
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+              <div className="text-amber-400 font-bold">IISc Bengaluru</div>
+              <div className="text-white text-xs">Topological Kagome Crystal</div>
+              <div className="text-[11px] text-slate-400">Condensed Matter Physics</div>
             </div>
-
-            {/* 2. Research Dossier & Briefings Promo */}
-            <div className="p-5 bg-gradient-to-br from-slate-900 to-cyan-950/40 border border-slate-800 rounded-xl space-y-3 font-sans">
-              <div className="flex items-center gap-2 text-xs font-mono-code text-cyan-400 uppercase font-bold">
-                <FileText className="w-4 h-4" />
-                <span>Periodic Intelligence Reports</span>
-              </div>
-              <h4 className="text-sm font-bold text-white">
-                Compiled Intelligence Briefings
-              </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Access structured quarterly situation dossiers, policy analysis briefs, and cross-sectoral research digests formatted for strategic evaluation.
-              </p>
-              <button
-                onClick={onNavigateEpaper}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-mono-code font-bold rounded-lg border border-slate-700 cursor-pointer transition-colors"
-              >
-                Access Briefing Archives
-              </button>
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+              <div className="text-amber-400 font-bold">ISRO & IIA</div>
+              <div className="text-white text-xs">Aditya-L1 Heliosphere Shock</div>
+              <div className="text-[11px] text-slate-400">Deep Space & Solar Corona</div>
             </div>
-
-            {/* 3. Methodology & Verification Standards */}
-            <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3 font-sans">
-              <h4 className="text-xs font-mono-code uppercase font-bold text-slate-200 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Verification Standards
-              </h4>
-              <ul className="text-xs text-slate-400 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-                  <span>Deduplication through SHA-256 content hashes</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-                  <span>Automated 14-day retention rule for unreviewed staging</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0" />
-                  <span>Immutable origin wire preservation during editing</span>
-                </li>
-              </ul>
-              <button
-                onClick={onNavigateContact}
-                className="text-xs font-mono-code text-cyan-400 hover:text-cyan-300 pt-1 block"
-              >
-                Inspect Methodology Documentation →
-              </button>
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+              <div className="text-amber-400 font-bold">TIFR & TMC Mumbai</div>
+              <div className="text-white text-xs">NexCAR-19B Immunotherapy</div>
+              <div className="text-[11px] text-slate-400">CAR-T Complete Remission</div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+              <div className="text-amber-400 font-bold">IIT Bombay & IIT Madras</div>
+              <div className="text-white text-xs">Seawater Hydrogen & GeoBio AI</div>
+              <div className="text-[11px] text-slate-400">Clean Energy & Deep Tech</div>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

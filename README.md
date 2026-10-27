@@ -1,331 +1,341 @@
-# Samvad Intel (संवाद इंटेल)
+# Curiosity Research
 
-> **High-Precision Multilingual Information Intelligence & Research Platform**  
+> **Discover What’s Next.**  
+> **Global Science, Research & Emerging Technology Discovery Platform**  
 > **Created & Architected by Shubham Sonale**  
-> Powered by Cloudflare Workers, Edge D1 Distributed SQL, and Multi-Source Wire Verification.
+> Built on Cloudflare Workers, Edge D1 Distributed SQL, and Peer-Reviewed Ingestion Pipelines.
 
 ---
 
 ## 1. Product Vision & Purpose
 
-**Samvad Intel** transforms conventional regional news aggregation into a professional, high-performance **information intelligence and research platform**. 
+**Curiosity Research** transforms scientific discovery and emerging technology journalism into an open, high-precision research intelligence platform.
 
-Traditional news portals often present unverified, noisy RSS warehouses that blur the line between raw wire data and verified facts. **Samvad Intel** bridges this gap by providing an open, verifiable intelligence engine that aggregates, classifies, and cryptographically traces communications from official gazettes, government agencies, and regional bureaus across **Marathi (`mr`), Hindi (`hi`), and English (`en`)**.
+Contemporary scientific reporting is frequently fragmented between sensationalized summaries, inaccessible corporate paywalls, and noisy preprint servers. **Curiosity Research** bridges this divide by providing an elegant, distraction-free discovery engine that indexes peer-reviewed papers, connects readers directly to primary Digital Object Identifiers (DOIs), and tracks technological breakthroughs across global laboratories and premier Indian research powerhouses.
 
-### Core Value Propositions
-- **Source Transparency & Provenance:** Every piece of intelligence retains its cryptographic origin, publishing entity, and external reference URL.
-- **Strict Staging Separation:** Incoming RSS/Atom wires land in a staging pool and must pass through an editorial lifecycle (`incoming` → `review` → `approved` → `published`) before public exposure.
-- **Zero Database Bloat:** Cryptographic SHA-256 deduplication and an automated 14-day retention rule for unreviewed staging keep the edge database efficient while permanently preserving all verified dossiers.
-- **Multilingual Intelligence:** Native cross-lingual taxonomy spanning regional affairs (Maharashtra), national policy (Desh), global dynamics (World), economy, technology, and governance.
+### The Five Core Pillars
+
+1. **Premium Science & Technology Magazine:** In-depth, high-fidelity investigative features that elucidate complex experimental breakthroughs without compromising technical rigor.
+2. **Research Explorer for Scientific Papers:** Every publication is cataloged with its verified DOI, journal name, publication year, author affiliations, and one-click citation generators (BibTeX, APA, IEEE).
+3. **Real-Time Breakthrough Discovery Feed:** Automated 30-minute edge ingestion polling leading wire sources (Nature, Science, arXiv, Phys.org) with cryptographic SHA-256 deduplication.
+4. **Multi-Domain Topic Exploration:** Comprehensive categorization spanning 10 core scientific frontiers:
+   - Space & Astrophysics
+   - Quantum & High-Energy Physics
+   - Artificial Intelligence & Computing
+   - Biotechnology & Genomics
+   - Medicine & Clinical Health
+   - Chemistry & Materials Science
+   - Clean Energy & Climate Science
+   - Robotics & Autonomous Systems
+   - Advanced Engineering & Nanotechnology
+   - Perspectives & Reviews
+5. **Coverage of Indian Research Institutions:** Dedicated spotlight on landmark publications and indigenous technologies originating from IISc Bengaluru, TIFR Mumbai, ISRO, IITs, and CSIR laboratories.
 
 ---
 
-## 2. Intended Users & Use Cases
+## 2. Creator Attribution
 
-- **Policy Researchers & Analysts:** Track official government briefings (e.g., Press Information Bureau, state departments) with verified audit trails.
-- **Investigative Journalists & Fact-Checkers:** Trace wire origins, compare regional reporting, and cross-reference multiple news sources.
-- **Corporate & Regulatory Intelligence Teams:** Monitor state infrastructure tenders, agricultural economy trends, and legislative developments in real time.
-- **Editorial Newsrooms:** Curate, edit, and publish verified situation dossiers using a secure, session-authenticated editorial workbench.
+- **Platform Creator & System Architect:** **Shubham Sonale**
+- **Contact:** `shubhamsonale2004@gmail.com`
+- **Product Tagline:** *Discover What's Next.*
+- **Mission:** Democratizing open, verifiable scientific intelligence with zero paid API dependencies and uncompromising source transparency.
 
 ---
 
-## 3. System Architecture
+## 3. Intended Users & Use Cases
 
-Samvad Intel combines a serverless edge backend on Cloudflare with a client-side Single-Page Application (SPA) running in React 19 and Tailwind CSS.
+- **Academic & Doctoral Researchers:** Monitor incoming preprints and journal findings across interdisciplinary fields; export citations directly into `.bib` files for LaTeX literature reviews.
+- **Engineers & Deep-Tech Founders:** Track innovations in solid-state quantum devices, green hydrogen catalysts, and non-Euclidean graph transformers.
+- **Science Journalists & Communicators:** Trace technological assertions back to their raw experimental datasets and primary peer-reviewed DOI publications.
+- **Students & Curious Minds:** Explore frontiers of human knowledge with clear, authoritative scientific explanations grounded in verifiable evidence.
+- **Peer Editorial Newsroom:** Review, verify, and approve incoming research submissions through a secure, session-authenticated editorial workbench.
+
+---
+
+## 4. System Architecture
+
+Curiosity Research deploys a globally distributed edge architecture combining Cloudflare Workers, serverless D1 SQLite persistence, and a high-performance React 19 frontend.
 
 ```
-                              ┌────────────────────────────────────────┐
-                              │              PUBLIC USERS              │
-                              └───────────────────┬────────────────────┘
-                                                  │
-                                                  ▼
-                                       Cloudflare Workers Edge
-                                 (Routing & Asset Cache Layer)
-                                                  │
-                 ┌────────────────────────────────┴───────────────────────────────┐
-                 │                                                                │
-                 ▼                                                                ▼
-      GET /api/news (Strictly Published)                           REST /api/editorial/* & /api/admin/*
-                 │                                                                │
-                 ▼                                                                ▼
-       Cloudflare D1 Database                                       HttpOnly Session Token Validation
-  (Published Dossiers & Sources)                                                  │
-                                                                                  ▼
+                               ┌────────────────────────────────────────┐
+                               │           RESEARCH EXPLORERS           │
+                               │        (Desktop & Mobile Web)          │
+                               └───────────────────┬────────────────────┘
+                                                   │
+                                                   ▼
+                                        Cloudflare Workers Edge
+                                  (Routing & Single-Page Asset Cache)
+                                                   │
+                  ┌────────────────────────────────┴───────────────────────────────┐
+                  │                                                                │
+                  ▼                                                                ▼
+       GET /api/news (Strictly Published)                           REST /api/editorial/* & /api/admin/*
+       GET /api/institutions (Research Hubs)                                       │
+                  │                                                                ▼
+                  ▼                                                HttpOnly Session Token Validation
+        Cloudflare D1 Database                                                     │
+   (Published Papers, Hubs & Sources)                                              ▼
                                                                      Cloudflare D1 Database (All Pools)
                                                                  (Incoming, Review, Approved, Published)
-                                                                                  ▲
-                                                                                  │
-                                                                   Scheduled Cron (*/30 min)
-                                                                  Wire Ingestion & SHA-256 Hashing
+                                                                                   ▲
+                                                                                   │
+                                                                    Scheduled Cron (*/30 min)
+                                                                 Scientific Ingestion & SHA-256 Hashing
 ```
 
-### Backend Capabilities (Preserved from Underlying Engine)
+### Backend Capabilities (Preserved & Reused Engine)
+
 1. **Cloudflare Worker Entrypoint (`src/worker/index.ts`):**
-   - Routes `/api/*` requests to the D1 REST router.
+   - Directs `/api/*` requests to the D1 REST router.
    - Serves built SPA static assets via Cloudflare `env.ASSETS` with single-page fallback.
-   - Runs background ingestion every 30 minutes via Cloudflare Cron Triggers (`*/30 * * * *`).
+   - Triggers background wire polling every 30 minutes via Cloudflare Cron Triggers (`*/30 * * * *`).
 2. **Edge D1 Database (`migrations/`):**
-   - Distributed SQLite cluster with five applied migrations (`0001` through `0005`).
-   - Stores `news_sources`, `stories` (with full `content` and editorial fields), and `editorial_sessions`.
-3. **Ingestion & Classification Pipeline (`src/worker/ingestion.ts`, `src/worker/classifier.ts`):**
-   - High-fault-tolerant RSS/Atom feed parser (`rssParser.ts`).
-   - Keyword and contextual classification into standard domains (`maharashtra`, `desh`, `world`, `politics`, `economy`, `education`, `tech`, `sports`, `editorial`).
-   - Canonical SHA-256 content hashing to eliminate duplicates.
-   - Non-destructive 14-day archiving rule for unreviewed incoming items.
+   - Serverless SQLite cluster with 6 migrations (`0001` through `0006`).
+   - Cleaned of obsolete newspaper stories while preserving table structures (`news_sources`, `stories`, `editorial_sessions`, and `research_institutions`).
+   - Additive schema additions for scientific research metadata (`doi`, `journal_name`, `publication_year`, `primary_institution`, `paper_url`, `citation_count`, `is_breakthrough`).
+3. **Ingestion & Classifier Pipeline (`src/worker/ingestion.ts`, `src/worker/classifier.ts`):**
+   - High-fault-tolerant, zero-dependency RSS/Atom parser (`rssParser.ts`).
+   - Deterministic keyword and contextual classifier mapping articles into scientific disciplines.
+   - Canonical SHA-256 content hashing (`title|source_url`) preventing duplicate records.
+   - Automated 14-day archival retention rule preventing database bloat while permanently protecting approved and published research dossiers.
 4. **Session Authentication & Security (`src/worker/api.ts`):**
-   - Cryptographic constant-time validation of admin credentials against `ADMIN_API_KEY`.
+   - Cryptographic constant-time comparison against `env.ADMIN_API_KEY` preventing timing attacks.
    - Ephemeral HttpOnly cookie sessions stored in D1 (`editorial_sessions`).
-   - Zero exposure of admin credentials or draft/incoming stories to public endpoints.
-
----
-
-## 4. Frontend Design & Information Architecture
-
-The frontend has been rebuilt from a traditional Marathi newspaper format into a minimal, dark-mode-first intelligence suite:
-
-1. **Intelligence Stream (Live Wire):**
-   - Replaces the newspaper homepage with an interactive intelligence dashboard.
-   - Real-time published wire records directly retrieved from Cloudflare D1.
-   - Filterable by provenance group (*Verified Official*, *National Wire*, *Global Intelligence*), topic domain, and language (*Marathi*, *Hindi*, *English*).
-   - Read-only for public visitors (no public ingestion triggers).
-2. **Research Dossier Reader:**
-   - Streamlined, distraction-free reading experience with academic/research citation export.
-   - Full-text multi-paragraph body rendering without truncation.
-   - Source provenance metadata, authoring agency, and D1 cryptographic verification trail.
-   - Graceful fallback messaging (*ही बातमी सध्या उपलब्ध नाही*) for non-existent or unapproved records.
-3. **Domain Exploration Pages:**
-   - Dedicated deep dives for individual categories with language sub-filtering.
-4. **Research Query Engine (`⌘K` Modal & Search Page):**
-   - Global keyboard-driven search across dossiers, agencies, and tags.
-5. **Saved Research Dossiers:**
-   - Local research bookmarking system with persistence for synthesis and review.
-6. **Source Transparency Directory:**
-   - Live query of active backend sources (`/api/sources`) showing group, language, protocol, and homepage verification links.
-7. **Periodic Intelligence Briefings:**
-   - Synthesized situational reviews and analytical briefings derived from verified D1 streams.
+   - Unpublished research papers (`incoming`, `review`, `rejected`) strictly return HTTP 404 on public APIs.
 
 ---
 
 ## 5. Technology Stack
 
-- **Runtime & Deployment:** Cloudflare Workers, Cloudflare D1 Database, Cloudflare Assets
-- **Frontend Framework:** React 19, TypeScript 5.7, Vite 6
-- **Styling:** Tailwind CSS v4, Plus Jakarta Sans, JetBrains Mono, Newsreader
+- **Frontend:** React 19, TypeScript 5.7, Tailwind CSS v4, Vite 6
 - **Icons:** Lucide React
-- **CLI & Deployment Tools:** Wrangler 4.x, Node.js / Tsx
+- **Backend / Edge Runtime:** Cloudflare Workers (TypeScript)
+- **Database:** Cloudflare D1 (Serverless Distributed SQLite)
+- **Typography:** Plus Jakarta Sans (Modern UI), JetBrains Mono (Technical indicators & DOIs), Newsreader (Serif academic dossier reading)
+- **Tooling:** Wrangler 4, tsx, Node.js 22
 
 ---
 
 ## 6. Repository Structure
 
 ```
-├── index.html                   # HTML entry point with Samvad Intel metadata & web fonts
-├── metadata.json                # Project capabilities and metadata
-├── package.json                 # Dependencies and build scripts
-├── tsconfig.json                # TypeScript configuration
-├── vite.config.ts               # Vite configuration with Tailwind CSS plugin
-├── wrangler.jsonc               # Cloudflare Workers, D1 binding, and Cron trigger configuration
+├── .gitignore
+├── README.md                      # Comprehensive product documentation
+├── index.html                     # HTML5 entry point with scientific metadata & JSON-LD
+├── metadata.json                  # AI Studio metadata & capabilities
+├── package.json                   # Dependencies and npm scripts
+├── tsconfig.json                  # Strict TypeScript configuration
+├── vite.config.ts                 # Vite bundler configuration with Tailwind v4 plugin
+├── wrangler.jsonc                 # Cloudflare Worker & D1 binding configuration
+│
+├── migrations/                    # D1 SQLite Database Migrations
+│   ├── 0001_initial_schema.sql    # Base tables: news_sources, stories, indexes
+│   ├── 0002_add_source_groups.sql # Categorization groups
+│   ├── 0003_add_editorial_fields.sql # Editorial audit columns
+│   ├── 0004_editorial_sessions.sql   # Session authentication table
+│   ├── 0005_add_story_content.sql    # Full article/paper content body
+│   └── 0006_curiosity_research.sql   # Scientific metadata, institutions & paper seeds
+│
 ├── scripts/
-│   └── prepare-cloudflare.js    # Pre-build validation script for Cloudflare D1 ID
-├── migrations/                  # D1 SQLite Database Migrations
-│   ├── 0001_initial_schema.sql
-│   ├── 0002_add_source_groups.sql
-│   ├── 0003_add_editorial_fields.sql
-│   ├── 0004_editorial_sessions.sql
-│   └── 0005_add_story_content.sql
+│   └── prepare-cloudflare.js      # Build preparation & D1 validation helper
+│
 ├── src/
-│   ├── main.tsx                 # React DOM mount point
-│   ├── App.tsx                  # Root routing dispatcher and application state
-│   ├── index.css                # Global CSS rules, typography, and scroll utilities
+│   ├── main.tsx                   # React root entry point
+│   ├── App.tsx                    # Top-level routing composition & state management
+│   ├── index.css                  # Global Tailwind v4 CSS imports
+│   │
 │   ├── types/
-│   │   └── news.ts              # Frontend TypeScript definitions for articles, categories, and sources
-│   ├── utils/
-│   │   ├── router.ts            # Hash router supporting article slugs, domains, and editorial desk
-│   │   ├── readingPreferences.ts# LocalStorage preferences hook (theme, font size, bookmarks)
-│   │   └── dateFormatter.ts     # Bilingual date and relative time formatting helpers
-│   ├── services/
-│   │   └── newsService.ts       # Content abstraction layer interfacing with D1 /api/* endpoints
+│   │   ├── news.ts                # Core Article, Category, Author, and Status interfaces
+│   │   └── research.ts            # ResearchDiscipline, ScientificPaper, Institution types
+│   │
 │   ├── data/
-│   │   ├── categories.ts        # Category slugs, English & Marathi labels, and descriptions
-│   │   ├── newsArticles.ts      # Offline baseline intelligence articles
-│   │   ├── tickerData.ts        # Real-time briefing updates
-│   │   └── editionData.ts       # Editorial board information
+│   │   ├── categories.ts          # 10 Scientific disciplines + backward-compatible categories
+│   │   ├── newsArticles.ts        # Landmark scientific papers & research dossiers (with DOIs)
+│   │   ├── tickerData.ts          # Real-time scientific breakthrough briefs
+│   │   └── editionData.ts         # Monthly compendium & curator metadata (Shubham Sonale)
+│   │
+│   ├── services/
+│   │   └── newsService.ts         # Data layer abstraction (Worker API + local fallback)
+│   │
+│   ├── utils/
+│   │   ├── router.ts              # Hash-based SPA routing engine (#/article/:id, #/category/:slug)
+│   │   └── readingPreferences.ts  # Theme, font-size, and workstation bookmark state
+│   │
 │   ├── components/
 │   │   ├── common/
-│   │   │   ├── TopNav.tsx                   # Platform navigation bar with edge telemetry & search shortcut
-│   │   │   ├── IntelligenceFooter.tsx       # System architecture, standards & disclosure footer
-│   │   │   ├── IntelligenceSearchModal.tsx  # Cmd+K search modal with domain filtering
-│   │   │   └── ImageWithFallback.tsx        # Fallback-safe image rendering component
+│   │   │   ├── TopNav.tsx                 # Curiosity Research global navigation header
+│   │   │   ├── IntelligenceFooter.tsx     # Platform footer with institutions & creator credit
+│   │   │   ├── IntelligenceSearchModal.tsx # Cmd+K paper and DOI search modal
+│   │   │   └── ImageWithFallback.tsx      # Robust asset rendering with placeholder fallback
 │   │   └── editorial/
-│   │       └── StoryWorkspace.tsx           # Multi-pane newsroom workspace (Editor, Wire, Preview)
+│   │       └── StoryWorkspace.tsx         # Newsroom editing and publishing workspace
+│   │
 │   ├── pages/
-│   │   ├── IntelligenceStreamPage.tsx       # Primary intelligence homepage
-│   │   ├── IntelligenceDossierPage.tsx      # Full dossier reading page with citation tools
-│   │   ├── IntelligenceCategoryPage.tsx     # Topic domain exploration view
-│   │   ├── IntelligenceSearchPage.tsx       # Query engine page
-│   │   ├── ResearchDossierPage.tsx          # Saved research dossiers list
-│   │   ├── MethodologyPage.tsx              # System architecture and verification standards
-│   │   ├── SourceDirectoryPage.tsx          # Source transparency directory and feed nomination
-│   │   ├── BriefingArchivesPage.tsx         # Periodic situation reports and briefings
-│   │   └── EditorialDashboardPage.tsx       # Restricted staff editorial desk
-│   └── worker/                  # Cloudflare Worker Backend
-│       ├── index.ts             # Worker fetch & scheduled cron dispatcher
-│       ├── api.ts               # REST API endpoints (Public & Protected Editorial)
-│       ├── ingestion.ts         # Multi-source RSS/Atom fetcher, deduplication & retention engine
-│       ├── rssParser.ts         # Robust XML feed parser
-│       ├── classifier.ts        # Domain classifier
-│       └── types.ts             # Worker environment, D1, and feed types
-└── test/                        # Complete backend and architecture verification suites
-    ├── test_router.ts
-    ├── test_editorial_auth.ts
-    ├── test_editorial_dashboard.ts
-    ├── test_homepage_api_integration.ts
-    ├── test_article_reading_pipeline.ts
-    └── test_ux_and_architecture_fixes.ts
+│   │   ├── IntelligenceStreamPage.tsx     # Primary Science Magazine & Breakthrough Wire
+│   │   ├── IntelligenceDossierPage.tsx    # Academic Paper Dossier reader with citation generator
+│   │   ├── IntelligenceCategoryPage.tsx   # Discipline exploration page (Space, Quantum, AI...)
+│   │   ├── IntelligenceSearchPage.tsx     # Full-scale scientific research query explorer
+│   │   ├── ResearchDossierPage.tsx        # Personal research workstation with BibTeX export
+│   │   ├── MethodologyPage.tsx            # About, verification protocols, creator attribution
+│   │   ├── SourceDirectoryPage.tsx        # Institutions & verified feeds catalog + submission
+│   │   ├── BriefingArchivesPage.tsx       # Monthly research compendiums (Vol. I-III)
+│   │   └── EditorialDashboardPage.tsx     # Peer-review & publishing dashboard
+│   │
+│   └── worker/
+│       ├── index.ts               # Cloudflare Worker fetch & cron handlers
+│       ├── api.ts                 # REST API router (/api/news, /api/institutions, /api/editorial/*)
+│       ├── ingestion.ts           # Wire fetcher, SHA-256 hasher, retention manager
+│       ├── classifier.ts          # Deterministic keyword discipline classifier
+│       ├── rssParser.ts           # Zero-dependency XML RSS/Atom parser
+│       └── types.ts               # Cloudflare Worker D1 schema types
+│
+└── test/                          # Comprehensive Verification Test Suites
+    ├── test_router.ts             # Routing hash parsing & fallback isolation
+    ├── test_editorial_auth.ts     # Constant-time auth & session lifecycle tests
+    ├── test_editorial_dashboard.ts# Editorial workflow (draft -> approve -> publish)
+    ├── test_homepage_api_integration.ts # API integration & static fallback tests
+    ├── test_article_reading_pipeline.ts # Full-text content integrity tests
+    └── test_ux_and_architecture_fixes.ts # End-to-end UX & retention rules tests
 ```
 
 ---
 
-## 7. Verified Backend API Overview
+## 7. Verified Backend API Routes
 
-All public endpoints are strictly read-only and return only published records. Private editorial endpoints require a valid session.
+All endpoints execute within the Cloudflare Worker runtime:
 
-### Public Read-Only Endpoints
-- `GET /api/sources`: Returns all active news and wire sources grouped by `source_group`.
-- `GET /api/news`: Returns paginated published intelligence stories with optional `category`, `source_group`, `page`, and `limit` query parameters.
-- `GET /api/news/category/:category`: Returns published stories filtered by category.
-- `GET /api/news/:id`: Returns a specific published story by `id` or `source_guid`. Returns `HTTP 404` for non-existent or unpublished stories.
-
-### Protected Editorial Endpoints (Requires Session Cookie or Bearer Token)
-- `POST /api/editorial/auth/login`: Authenticates credentials against `ADMIN_API_KEY` and creates a 24-hour session in `editorial_sessions`.
-- `POST /api/editorial/auth/logout`: Destroys the active session in D1.
-- `GET /api/editorial/auth/session`: Checks whether the current client holds an active authenticated session.
-- `GET /api/editorial/stats`: Returns counts across `incoming`, `review`, `approved`, `published`, `rejected`, and `archived`.
-- `GET /api/editorial/incoming`: Returns incoming unreviewed wire stories.
-- `GET /api/editorial/stories`: Generic query across any editorial status.
-- `PATCH /api/editorial/story/:id`: Updates title, content, category, language, or notes without corrupting original wire metadata.
-- `POST /api/editorial/story/:id/review`: Advances story to `review`.
-- `POST /api/editorial/story/:id/approve`: Advances story to `approved`.
-- `POST /api/editorial/story/:id/publish`: Transitions approved story to `published`.
-- `POST /api/editorial/story/:id/reject`: Transitions story to `rejected`.
-- `POST /api/editorial/story/:id/archive`: Archives a story.
-- `POST /api/admin/refresh`: Manually triggers the RSS wire ingestion pipeline (authenticated staff only).
+| Method | Endpoint | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/news` | Public | Returns published research articles with pagination, category, and source group filters. |
+| `GET` | `/api/news/:id` | Public | Returns a single published article/paper. Returns HTTP 404 for draft, review, or rejected stories. |
+| `GET` | `/api/sources` | Public | Returns registered scientific feeds with active status and group metadata. |
+| `GET` | `/api/institutions`| Public | Returns directory of premier Indian and global research institutions. |
+| `POST`| `/api/editorial/auth/login` | Public | Authenticates editor using timing-safe secret check; issues HttpOnly cookie. |
+| `GET` | `/api/editorial/auth/session` | Protected | Validates active session token from cookie or Bearer header against D1. |
+| `POST`| `/api/editorial/auth/logout`| Protected | Destroys active session record in D1 and clears cookie. |
+| `GET` | `/api/editorial/incoming` | Protected | Lists unreviewed incoming papers awaiting editorial decision. |
+| `GET` | `/api/editorial/stats` | Protected | Real-time counts of papers across status pools (`incoming`, `review`, `approved`, `published`, `rejected`). |
+| `POST`| `/api/editorial/story/:id/approve` | Protected | Transitions paper to approved status. |
+| `POST`| `/api/editorial/story/:id/publish` | Protected | Publishes approved research paper to the public `/api/news` wire. |
+| `POST`| `/api/editorial/story/:id/reject` | Protected | Rejects paper with optional editorial reason. |
+| `PATCH`|`/api/editorial/story/:id` | Protected | Updates editable metadata (title, abstract, content, DOI, institution, tags). |
+| `POST`| `/api/admin/refresh` | Protected | Manually triggers ingestion pipeline execution. |
 
 ---
 
 ## 8. Local Development & Installation
 
 ### Prerequisites
-- Node.js 20+
+- Node.js >= 20.0.0
 - npm or bun
 
-### Setup Instructions
-1. Clone the repository and install dependencies:
-   ```bash
-   npm install
-   ```
-2. Run the local development server:
-   ```bash
-   npm run dev
-   ```
-   The application will start on `http://localhost:3000`.
+### Step 1: Install Dependencies
+```bash
+npm install
+```
 
-3. Run linting & type checks:
-   ```bash
-   npm run lint
-   ```
+### Step 2: Run Development Server
+```bash
+npm run dev
+```
+The application will be accessible at `http://localhost:3000`.
 
-4. Execute backend test suites:
-   ```bash
-   npx tsx test/test_router.ts
-   npx tsx test/test_editorial_auth.ts
-   npx tsx test/test_editorial_dashboard.ts
-   npx tsx test/test_homepage_api_integration.ts
-   npx tsx test/test_article_reading_pipeline.ts
-   npx tsx test/test_ux_and_architecture_fixes.ts
-   ```
+### Step 3: Run Verification Test Suites
+Execute all six verified unit and integration test suites:
+```bash
+npx tsx test/test_router.ts
+npx tsx test/test_editorial_auth.ts
+npx tsx test/test_editorial_dashboard.ts
+npx tsx test/test_homepage_api_integration.ts
+npx tsx test/test_article_reading_pipeline.ts
+npx tsx test/test_ux_and_architecture_fixes.ts
+```
+
+### Step 4: Validate Production Build & Type Checking
+```bash
+npm run lint    # Runs tsc --noEmit
+npm run build   # Prepares Cloudflare bindings and compiles production Vite bundle
+```
 
 ---
 
 ## 9. Cloudflare Deployment Instructions
 
-The project is configured for direct deployment to Cloudflare Workers with D1 and Assets bindings.
+The project is preconfigured to deploy directly to Cloudflare Workers with Assets:
 
-### Configuration (`wrangler.jsonc`)
-- Worker entry point: `src/worker/index.ts`
-- Asset directory: `./dist` (configured as a single-page application)
-- Database binding: `DB` pointing to `bahumol-samaj-db`
-- Cron triggers: `["*/30 * * * *"]`
+1. **Authenticate Wrangler:**
+   ```bash
+   npx wrangler login
+   ```
 
-### Production Build & Deploy
-1. Build frontend assets and validate D1 configuration:
+2. **Run D1 Database Migrations (Remote):**
    ```bash
-   npm run build
+   npx wrangler d1 migrations apply bahumol-samaj-db --remote
    ```
-2. Verify deployment locally via dry run:
+
+3. **Configure Editorial Secret:**
+   Set the secure editorial newsroom key in Cloudflare:
    ```bash
-   npx wrangler deploy --dry-run
+   npx wrangler secret put ADMIN_API_KEY
    ```
-3. Deploy to Cloudflare Workers:
+
+4. **Deploy Application:**
    ```bash
    npm run deploy
    ```
 
-### D1 Database Migrations
-To apply migrations on the remote Cloudflare D1 database:
-```bash
-npm run d1:migrate
-```
+### Proposed Infrastructure Renames
+To maintain complete deployment stability and prevent broken remote bindings, the Cloudflare Worker name (`bahumol-samaj`) and D1 database binding (`bahumol-samaj-db`) have been deliberately preserved in `wrangler.jsonc` and `package.json`.
+
+**Recommended Remote Renaming Steps (When Ready):**
+1. Create new D1 database: `npx wrangler d1 create curiosity-research-db`
+2. Update `wrangler.jsonc`:
+   - Set `"name": "curiosity-research"`
+   - Set `"database_name": "curiosity-research-db"` and provide the newly returned `database_id`
+3. Apply migrations to new database:
+   ```bash
+   npx wrangler d1 migrations apply curiosity-research-db --remote
+   ```
+4. Set secret on new worker: `npx wrangler secret put ADMIN_API_KEY --name curiosity-research`
+5. Deploy: `npx wrangler deploy`
 
 ---
 
-## 10. Required Environment Variables & Secrets
+## 10. Security Considerations
 
-Configure secrets via Cloudflare Dashboard or Wrangler CLI (never commit values to version control):
-
-| Variable / Secret | Scope | Purpose |
-| :--- | :--- | :--- |
-| `ADMIN_API_KEY` | Worker Secret | Secret credential used by editorial staff to authenticate at `/api/editorial/auth/login`. |
-| `ENVIRONMENT` | Worker Variable | Environment designation (e.g., `production` or `development`) to enforce secure cookies. |
-
----
-
-## 11. Security Considerations
-
-- **Strict Status Gating:** Unauthenticated visitors have access only to `status = 'published'` records. Incoming, under review, rejected, or archived stories return HTTP 404 on the public API.
-- **Timing-Safe Secret Verification:** Secret keys submitted to `/api/editorial/auth/login` are compared using `crypto.subtle` SHA-256 digests in constant time to prevent timing attacks.
-- **Credential Isolation:** The `ADMIN_API_KEY` is never transmitted to the browser or included in client bundle outputs. Sessions rely on random 24-byte tokens.
-- **Read-Only Public Surface:** Public visitors cannot initiate ingestion or insert records into D1.
+- **Zero Hardcoded Secrets:** Secret validation executes exclusively against server-configured `env.ADMIN_API_KEY`. No default fallback credentials exist in the codebase.
+- **Timing-Attack Resistance:** Verification uses `crypto.subtle.digest('SHA-256')` with XOR-sum constant-time byte loops.
+- **Strict Public Status Gating:** Unreviewed incoming feeds, drafts, and rejected articles are never exposed on public read endpoints (`/api/news`). Attempting to access an unpublished record returns HTTP 404.
+- **HttpOnly Cookie Sessions:** Editorial dashboard access utilizes server-side session IDs (`ses_*`) with `SameSite=Lax` and `HttpOnly` flags.
+- **SQL Injection Prevention:** All D1 database queries utilize parameterized prepared statements (`db.prepare(...).bind(...)`).
 
 ---
 
-## 12. Current Implementation Status & Roadmap
+## 11. Current Implementation Status vs Planned Capabilities
 
-### Implemented & Verified Capabilities
-- [x] Modern Samvad Intel product identity, typography, and high-contrast dark theme.
-- [x] Live intelligence stream homepage connected to Cloudflare D1 `/api/news`.
-- [x] Dedicated research dossier reader with citation export and full body rendering.
-- [x] Topic domain exploration pages with multilingual toggles (`mr`, `hi`, `en`).
-- [x] Quick search modal (`⌘K`) and full-page query engine.
-- [x] Source transparency catalog querying `/api/sources`.
-- [x] Local research dossier bookmarking with LocalStorage persistence.
-- [x] Preserved editorial dashboard (`#/editorial-desk`) with HttpOnly session authentication and full status lifecycle.
-- [x] 100% passing test coverage across 6 backend and UX test suites (84 total assertions passed).
+### Currently Implemented & Verified
+- [x] Full product re-identity as **Curiosity Research** with creator attribution to **Shubham Sonale** (*Discover What’s Next*).
+- [x] Premium science and technology magazine layout with featured landmark breakthroughs.
+- [x] Research paper reader with DOI links, publisher links, academic affiliations, and abstracts.
+- [x] One-click interactive Citation Generator (BibTeX, APA, IEEE formats).
+- [x] Personal Research Workstation with bookmarking, literature review management, and `.bib` file download.
+- [x] 10 Scientific disciplines taxonomy with multi-dimensional filtering.
+- [x] Premier Indian Research Institutions catalog (IISc, TIFR, ISRO, IIT Bombay, IIT Madras, CSIR-NCL, NCBS, IUCAA).
+- [x] Verified scientific wire sources catalog (Nature, Science, arXiv, Phys.org, ISRO).
+- [x] Interactive paper submission flow for researchers and institutions.
+- [x] Preserved session-authenticated editorial newsroom and peer-review pipeline.
+- [x] D1 additive migration `0006_curiosity_research.sql` for scientific metadata and institution reference tables.
+- [x] 100% pass rate across all 6 test suites (84/84 assertions).
+- [x] Production build and TypeScript verification cleanly passing.
 
-### Planned Future Capabilities
-- [ ] Export of research dossiers to Markdown and BibTeX formats.
-- [ ] Interactive source graph visualization depicting wire citation relationships.
-- [ ] Automated alerting webhooks for high-priority government gazette announcements.
-- [ ] Granular role-based access control (Admin, Senior Editor, Wire Analyst).
+### Planned Future Roadmap
+- [ ] Direct LaTeX and MathJax / KaTeX rendering in equation-dense theoretical physics papers.
+- [ ] Interactive 3D molecular structures viewer (PDB/mmCIF WebGL render) for biochemical publications.
+- [ ] Automated arXiv daily category sync via webhook.
+- [ ] Reader customizable email digests for newly indexed papers matching specific keywords or DOIs.
 
 ---
 
-## 13. Creator & Attribution
+## 12. License & Rights
 
-**Samvad Intel** was created and architected by **Shubham Sonale**.
-
-- **Creator:** Shubham Sonale
-- **Role:** Lead System Architect & Product Designer
-- **Vision:** Open, verifiable, edge-native information intelligence platform unifying multilingual regional journalism, official governance feeds, and analytical research workflows.
-- **License:** Proprietary / Open Intelligence Architecture
-
+Architected and developed by **Shubham Sonale**. Open research indexing and public scientific discovery provided under open-science principles.

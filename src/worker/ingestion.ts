@@ -31,7 +31,7 @@ async function fetchSourceWithTimeout(url: string, timeoutMs: number = 8000): Pr
       signal: controller.signal,
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Bahumol-Samaj-Bot/1.0',
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Curiosity-Research-Bot/1.0 (+https://curiosityresearch.org)',
         Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
       },
     });
@@ -250,7 +250,7 @@ export async function applyRetentionRules(
       .run();
     prunedCount = pruneRes.meta?.changes || 0;
   } catch (err) {
-    console.warn('[Bahumol DB Retention] Safe retention cleanup note:', err);
+    console.warn('[Curiosity DB Retention] Safe retention cleanup note:', err);
   }
 
   return { archivedCount, prunedCount };

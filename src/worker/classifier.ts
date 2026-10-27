@@ -1,10 +1,22 @@
 /**
  * @file classifier.ts
- * Deterministic Marathi news category classifier.
+ * Deterministic category and scientific discipline classifier for Curiosity Research.
  * Rules-based keyword matching without external AI or network calls.
  */
 
 export const VALID_CATEGORIES = [
+  'space',
+  'physics',
+  'chemistry',
+  'biology',
+  'medicine',
+  'ai',
+  'robotics',
+  'energy',
+  'engineering',
+  'indian-innovation',
+  'editorial',
+  // Legacy categories for backward compatibility
   'महाराष्ट्र',
   'देश',
   'जग',
@@ -17,10 +29,62 @@ export const VALID_CATEGORIES = [
   'संपादकीय',
 ] as const;
 
-export type MarathiCategory = typeof VALID_CATEGORIES[number];
+export type CategoryCandidate = typeof VALID_CATEGORIES[number];
 
 // Keyword mappings for deterministic categorization
-const CATEGORY_KEYWORDS: Record<MarathiCategory, string[]> = {
+const CATEGORY_KEYWORDS: Record<CategoryCandidate, string[]> = {
+  space: [
+    'space', 'astronomy', 'astrophysics', 'orbit', 'isro', 'nasa', 'esa', 'telescope',
+    'coronal', 'heliosphere', 'solar', 'galaxy', 'black hole', 'chandrayaan', 'aditya-l1',
+    'gaganyaan', 'satellite', 'rocket', 'planetary', 'cosmology', 'exoplanet', 'mars', 'lunar'
+  ],
+  physics: [
+    'quantum', 'physics', 'superconductivity', 'particle', 'condensed matter', 'cern',
+    'higgs', 'hadron', 'qubit', 'photon', 'laser', 'lattice', 'kagome', 'fermi',
+    'relativity', 'semiconductor', 'chiral', 'topological'
+  ],
+  ai: [
+    'artificial intelligence', 'machine learning', 'deep learning', 'neural network',
+    'transformer', 'algorithm', 'graph attention', 'nlp', 'computer vision', 'robotics',
+    'autonomous', 'foundation model', 'large language model', 'reinforcement learning'
+  ],
+  biology: [
+    'genomics', 'crispr', 'dna', 'rna', 'gene', 'epigenetic', 'synthetic biology',
+    'cellular', 'biotechnology', 'protein', 'enzyme', 'microbiome', 'plant genetics',
+    'molecular biophysics', 'ncbs', 'stomata'
+  ],
+  medicine: [
+    'medicine', 'oncology', 'car-t', 'immunotherapy', 'clinical trial', 'leukemia',
+    'pathology', 'vaccine', 'antibody', 'pharmaceutical', 'therapeutic', 'remission',
+    'cardiology', 'neurology', 'healthcare', 'tifr oncology'
+  ],
+  chemistry: [
+    'catalysis', 'organic chemistry', 'polymer', 'metal-organic', 'molecule',
+    'spectroscopy', 'synthesis', 'chemical reaction', 'flow chemistry', 'crystal',
+    'csir-ncl', 'nanomaterials'
+  ],
+  energy: [
+    'renewable energy', 'solar cell', 'perovskite', 'hydrogen', 'electrolysis',
+    'battery', 'energy storage', 'clean energy', 'carbon capture', 'fuel cell',
+    'seawater electrolysis', 'wind energy', 'nuclear fusion'
+  ],
+  robotics: [
+    'robotics', 'manipulator', 'actuator', 'bipedal', 'quadruped', 'kinematics',
+    'tactile sensing', 'automation', 'drone', 'uav', 'exoskeleton'
+  ],
+  engineering: [
+    'engineering', 'nanotechnology', 'mems', 'photonic', 'lithography',
+    'materials science', 'structural engineering', 'turbofan', 'aerospace'
+  ],
+  'indian-innovation': [
+    'iisc', 'tifr', 'iit bombay', 'iit madras', 'iit delhi', 'csir', 'dst india',
+    'shakti risc-v', 'make in india', 'national quantum mission', 'pib science'
+  ],
+  editorial: [
+    'perspective', 'editorial', 'review', 'analysis', 'methodology', 'opinion',
+    'open science', 'shubham sonale'
+  ],
+  // Legacy Marathi keywords preserved for pipeline continuity
   क्रीडा: [
     'क्रिकेट', 'सामना', 'खेळाडू', 'कुस्ती', 'कबड्डी', 'फुटबॉल', 'ऑलिम्पिक', 'पदक',
     'गोल', 'फलंदाज', 'गोलंदाज', 'विजय', 'पराभव', 'स्पर्धा', 'आयपीएल', 'वानखेडे',
@@ -52,8 +116,7 @@ const CATEGORY_KEYWORDS: Record<MarathiCategory, string[]> = {
     'महापालिका', 'जिल्हा परिषद', 'राजकारण', 'politics'
   ],
   संपादकीय: [
-    'अग्रलेख', 'संपादकीय', 'भाष्य', 'चिंतन', 'विचारमंथन', 'दृष्टिकोन', 'सडेतोड',
-    'editorial', 'opinion'
+    'अग्रलेख', 'संपादकीय', 'भाष्य', 'चिंतन', 'विचारमंथन', 'दृष्टिकोन', 'सडेतोड'
   ],
   जग: [
     'अमेरिका', 'रशिया', 'चीन', 'युक्रेन', 'इस्रायल', 'ब्रिटन', 'परराष्ट्र',
@@ -71,19 +134,19 @@ const CATEGORY_KEYWORDS: Record<MarathiCategory, string[]> = {
 };
 
 /**
- * Classify article into one of the 10 Marathi categories deterministically
+ * Classify article into one of the scientific domains or legacy categories deterministically
  */
 export function classifyArticle(
   title: string,
   description?: string,
   categoryCandidate?: string,
   defaultCategory?: string
-): MarathiCategory {
+): CategoryCandidate {
   // 1. Direct match on category candidate if provided by feed
   if (categoryCandidate) {
     const candidateLower = categoryCandidate.toLowerCase();
     for (const cat of VALID_CATEGORIES) {
-      if (candidateLower.includes(cat.toLowerCase()) || cat.toLowerCase().includes(candidateLower)) {
+      if (candidateLower === cat.toLowerCase() || candidateLower.includes(cat.toLowerCase())) {
         return cat;
       }
     }
@@ -92,12 +155,22 @@ export function classifyArticle(
   // 2. Scan title and description against deterministic keyword dictionary
   const fullText = `${title} ${description || ''}`.toLowerCase();
 
-  // Check specific categories first before broad categories like 'महाराष्ट्र' or 'देश'
-  const priorityOrder: MarathiCategory[] = [
+  const priorityOrder: CategoryCandidate[] = [
+    'space',
+    'physics',
+    'ai',
+    'biology',
+    'medicine',
+    'energy',
+    'chemistry',
+    'robotics',
+    'engineering',
+    'indian-innovation',
+    'editorial',
     'संपादकीय',
+    'विज्ञान-तंत्रज्ञान',
     'क्रीडा',
     'मनोरंजन',
-    'विज्ञान-तंत्रज्ञान',
     'शिक्षण',
     'अर्थव्यवस्था',
     'राजकारण',
@@ -107,7 +180,7 @@ export function classifyArticle(
   ];
 
   for (const cat of priorityOrder) {
-    const keywords = CATEGORY_KEYWORDS[cat];
+    const keywords = CATEGORY_KEYWORDS[cat] || [];
     for (const kw of keywords) {
       if (fullText.includes(kw.toLowerCase())) {
         return cat;
@@ -117,8 +190,8 @@ export function classifyArticle(
 
   // 3. Fallback to source default_category if valid
   if (defaultCategory && (VALID_CATEGORIES as readonly string[]).includes(defaultCategory)) {
-    return defaultCategory as MarathiCategory;
+    return defaultCategory as CategoryCandidate;
   }
 
-  return 'महाराष्ट्र';
+  return 'physics';
 }

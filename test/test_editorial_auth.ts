@@ -308,7 +308,7 @@ async function runProductionAuthTestSuite() {
   assert(
     resSessionAuth.status === 200 &&
       dataSessionAuth.authenticated === true &&
-      dataSessionAuth.user?.editorInChief === 'दिलीप सोनाळे',
+      dataSessionAuth.user?.editorInChief === 'Shubham Sonale',
     '4. Session endpoint identifies authenticated user'
   );
 

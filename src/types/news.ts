@@ -1,22 +1,41 @@
+/**
+ * @file news.ts
+ * Core data contracts for Curiosity Research.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
+ */
+
 export type CategorySlug =
+  | 'space'
+  | 'physics'
+  | 'chemistry'
+  | 'biology'
+  | 'medicine'
+  | 'ai'
+  | 'robotics'
+  | 'energy'
+  | 'engineering'
+  | 'indian-innovation'
+  | 'editorial'
+  | 'tech'
+  // Legacy compatibility slugs
   | 'maharashtra'
   | 'desh'
   | 'world'
   | 'politics'
   | 'economy'
   | 'education'
-  | 'tech'
   | 'sports'
-  | 'entertainment'
-  | 'editorial';
+  | 'entertainment';
 
-export type LanguageCode = 'mr' | 'hi' | 'en';
+export type LanguageCode = 'en' | 'mr' | 'hi';
 
 export interface Author {
   name: string;
   role: string;
   location: string;
   avatar?: string;
+  institution?: string;
 }
 
 export interface Quote {
@@ -45,26 +64,38 @@ export interface Article {
   sharesCount: number;
   tags: string[];
   quotes?: Quote[];
-  content: string[]; // Array of authentic Marathi editorial paragraphs
+  content: string[]; // Array of deep academic/research paragraphs
   language?: LanguageCode;
+
+  // Scientific research discovery metadata
+  doi?: string;
+  journalName?: string;
+  publicationYear?: number;
+  primaryInstitution?: string;
+  institutionCountry?: string;
+  paperUrl?: string;
+  citationCount?: number;
+  isBreakthrough?: boolean;
+  researchDiscipline?: string;
 }
 
 export interface Category {
   slug: CategorySlug;
-  nameMarathi: string;
   nameEnglish: string;
+  nameMarathi?: string;
   description: string;
   accentColor: string;
+  iconName?: string;
 }
 
 export interface WeeklyEdition {
   id: string;
-  volume: number; // वर्ष (Volume)
-  issue: number; // अंक (Issue)
-  dateRange: string; // '१ ते ७ ऑक्टोबर २०२६'
+  volume: number;
+  issue: number;
+  dateRange: string;
   fullDateLabel: string;
-  editorInChief: string; // 'दिलीप सोनाळे'
-  rniRegistration: string;
+  editorInChief: string;
+  rniRegistration?: string;
   establishedYear: number;
   headlineQuote: string;
 }
@@ -84,7 +115,9 @@ export interface BreakingItem {
   timestamp: string;
   category: CategorySlug;
   articleSlug: string;
+  doi?: string;
+  journal?: string;
 }
 
-export type EditionCity = 'पुणे' | 'मुंबई' | 'नागपूर' | 'नाशिक' | 'छत्रपती संभाजीनगर';
+export type EditionCity = 'Bengaluru' | 'Mumbai' | 'Delhi' | 'Pune' | 'Chennai' | 'पुणे';
 export type ThemeMode = 'light' | 'dark';

@@ -1,6 +1,8 @@
 /**
  * @file api.ts
- * Cloudflare Worker REST API router for Bahumol Samaj Weekly Newspaper.
+ * Cloudflare Worker REST API router for Curiosity Research.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  * Production-Safe Architecture:
  * 1. Public read-only endpoints (published stories only, public cache)
  * 2. Authenticated Editorial Newsroom endpoints (/api/editorial/*) protected by server-side D1 sessions
@@ -198,6 +200,27 @@ export async function handleApiRequest(request: Request, env: Env): Promise<Resp
       success: true,
       sources: rows.results || [],
     });
+  }
+
+  // -------------------------------------------------------------
+  // Public Endpoint: GET /api/institutions
+  // Returns premier research institutions from D1
+  // -------------------------------------------------------------
+  if (method === 'GET' && path === '/api/institutions') {
+    try {
+      const rows = await env.DB.prepare(
+        'SELECT * FROM research_institutions ORDER BY country ASC, name ASC'
+      ).all();
+      return jsonResponse({
+        success: true,
+        institutions: rows.results || [],
+      });
+    } catch {
+      return jsonResponse({
+        success: true,
+        institutions: [],
+      });
+    }
   }
 
   // -------------------------------------------------------------
@@ -404,7 +427,7 @@ export async function handleApiRequest(request: Request, env: Env): Promise<Resp
       JSON.stringify({
         success: true,
         message: 'संपादकीय ओळख यशस्वीरीत्या पडताळली (Authentication successful)',
-        user: { role: 'editor', editorInChief: 'दिलीप सोनाळे' },
+        user: { role: 'editor', editorInChief: 'Shubham Sonale' },
       }),
       {
         status: 200,
@@ -465,7 +488,7 @@ export async function handleApiRequest(request: Request, env: Env): Promise<Resp
     return jsonResponse(
       {
         authenticated: true,
-        user: { role: 'editor', editorInChief: 'दिलीप सोनाळे' },
+        user: { role: 'editor', editorInChief: 'Shubham Sonale' },
       },
       200
     );

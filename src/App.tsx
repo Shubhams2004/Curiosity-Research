@@ -1,6 +1,8 @@
 /**
  * @file App.tsx
- * Samvad Intel - Multilingual Information Intelligence & Research Platform
+ * Curiosity Research - Global Science & Technology Discovery Platform
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  * Entry routing and layout composition.
  * Preserves all backend endpoints and editorial flows (/editorial-desk, /api/*)
  */
@@ -12,7 +14,7 @@ import { getArticleBySlug, getArticleById } from './data/newsArticles';
 import { newsService } from './services/newsService';
 import { Article } from './types/news';
 
-// New Samvad Intel UI Components
+// Curiosity Research UI Components
 import { TopNav } from './components/common/TopNav';
 import { IntelligenceFooter } from './components/common/IntelligenceFooter';
 import { IntelligenceSearchModal } from './components/common/IntelligenceSearchModal';
@@ -188,7 +190,7 @@ export default function App() {
         }
         return (
           <IntelligenceCategoryPage
-            slug={route.params.slug || 'maharashtra'}
+            slug={route.params.slug || 'space'}
             onSelectArticle={handleSelectArticle}
             onNavigateHome={handleNavigateHome}
           />
@@ -203,9 +205,9 @@ export default function App() {
 
         if (loadingArticle && !article) {
           return (
-            <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-slate-400 font-mono-code text-xs">
+            <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-slate-400 font-mono text-xs">
               <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin mb-3" />
-              <p>Opening research dossier from edge node...</p>
+              <p>Opening peer-reviewed research dossier from D1 edge cluster...</p>
             </div>
           );
         }
@@ -217,17 +219,17 @@ export default function App() {
                 <AlertCircle className="w-7 h-7" />
               </div>
               <h2 className="text-xl font-bold text-white mb-2">
-                Intelligence Dossier Not Found
+                Research Publication Not Found
               </h2>
               <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-                ही बातमी सध्या उपलब्ध नाही. (The requested intelligence record does not exist or has not been approved for public release.)
+                The requested research record does not exist or has not been approved for public release.
               </p>
               <button
                 onClick={handleNavigateHome}
-                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-lg font-mono-code font-bold text-xs transition-colors cursor-pointer flex items-center gap-2"
+                className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 rounded-lg font-mono font-bold text-xs transition-colors cursor-pointer flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Return to Intelligence Wire
+                Return to Discovery Wire
               </button>
             </div>
           );
@@ -325,7 +327,7 @@ export default function App() {
         fontSize === 'lg' ? 'text-[17px]' : fontSize === 'sm' ? 'text-[14px]' : 'text-[15px]'
       }`}
     >
-      {/* 1. Samvad Intel Global Top Navigation Bar */}
+      {/* 1. Curiosity Research Global Top Navigation Bar */}
       <TopNav
         currentCategorySlug={currentCategorySlug}
         isArticlePage={route.page === 'article'}
@@ -349,7 +351,7 @@ export default function App() {
       {/* 2. Main Content View */}
       <main className="flex-1">{renderCurrentPage()}</main>
 
-      {/* 3. Global Intelligence Search Modal (Cmd+K / Ctrl+K) */}
+      {/* 3. Global Scientific Paper Search Modal (Cmd+K / Ctrl+K) */}
       <IntelligenceSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -357,7 +359,7 @@ export default function App() {
         onViewAllResults={handleViewAllResults}
       />
 
-      {/* 4. Samvad Intel Footer */}
+      {/* 4. Curiosity Research Footer */}
       <IntelligenceFooter
         onSelectCategory={handleSelectCategory}
         onNavigateHome={handleNavigateHome}

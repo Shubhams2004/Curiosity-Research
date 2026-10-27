@@ -1,6 +1,8 @@
 /**
  * @file EditorialDashboardPage.tsx
- * Professional Newsroom Editorial Dashboard for Bahumol Samaj Weekly Newspaper.
+ * Professional Peer-Review & Editorial Publishing Dashboard for Curiosity Research.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  * Production-Safe Authentication:
  * - Newsroom Login Screen
  * - HttpOnly Cookie & Server-Side D1 Session
@@ -254,7 +256,7 @@ export const EditorialDashboardPage: React.FC<EditorialDashboardPageProps> = ({
         authenticated: true,
         user: (res.user as { role: string; editorInChief: string }) || {
           role: 'editor',
-          editorInChief: 'दिलीप सोनाळे',
+          editorInChief: 'Shubham Sonale',
         },
       });
       showToast('संपादकीय नियंत्रण कक्षात आपले स्वागत आहे');
@@ -449,7 +451,7 @@ export const EditorialDashboardPage: React.FC<EditorialDashboardPageProps> = ({
             className="flex items-center gap-1.5 text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-red-700 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            मुख्य वर्तमानपत्राकडे परत जा
+            Return to Discovery Feed
           </button>
         </div>
 
@@ -460,37 +462,45 @@ export const EditorialDashboardPage: React.FC<EditorialDashboardPageProps> = ({
             <div className="inline-flex p-3 bg-red-100 dark:bg-red-950/60 rounded-full text-red-700 dark:text-red-400 mb-3">
               <Lock className="w-6 h-6" />
             </div>
-            <div className="text-xs uppercase tracking-widest font-mono-code font-bold text-cyan-500 mb-1">
-              SAMVAD INTEL • RESTRICTED DESK
+            <div className="text-xs uppercase tracking-widest font-mono font-bold text-cyan-400 mb-1">
+              CURIOSITY RESEARCH • EDITORIAL NEWSROOM
             </div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
-              संपादकीय नियंत्रण कक्ष (Editorial Desk)
+              Peer-Review & Editorial Desk
             </h1>
             <p className="text-xs text-stone-600 dark:text-stone-400 mt-1">
-              Intelligence Operations & Editorial Verification Desk
+              Scientific Verification & Publishing Workbench
             </p>
           </div>
 
           {/* Security Alert / Info Box */}
-          <div className="p-3 bg-stone-100 dark:bg-stone-800/60 rounded border border-stone-200 dark:border-stone-700/80 mb-5 text-xs text-stone-600 dark:text-stone-300">
-            <div className="flex items-center gap-1.5 font-bold text-stone-800 dark:text-stone-200 mb-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              सुरक्षित प्रमाणीकरण
+          <div className="p-3.5 bg-stone-100 dark:bg-stone-850 rounded border border-stone-200 dark:border-stone-700/80 mb-5 text-xs text-stone-600 dark:text-stone-300">
+            <div className="flex items-center gap-1.5 font-bold text-stone-800 dark:text-stone-100 mb-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Editorial Access Authentication</span>
             </div>
-            <p className="text-[11px] leading-relaxed text-stone-500 dark:text-stone-400">
-              हा कक्ष केवळ अधिकृत संपादकांसाठी राखीव आहे. Cloudflare Worker सीक्रेट{' '}
-              <code className="font-mono text-stone-800 dark:text-stone-200">ADMIN_API_KEY</code> द्वारे ओळख
-              पडताळली जाते.
+            <p className="text-[11px] leading-relaxed text-stone-600 dark:text-stone-400 mb-2">
+              The Peer-Review Newsroom authenticates against the Cloudflare Worker secret{' '}
+              <code className="px-1 py-0.5 rounded bg-stone-200 dark:bg-stone-800 font-mono text-cyan-400 font-semibold">
+                ADMIN_API_KEY
+              </code>
+              .
             </p>
+            <div className="text-[11px] bg-stone-200/70 dark:bg-stone-900/80 p-2 rounded font-mono text-stone-700 dark:text-stone-300 space-y-1">
+              <div className="text-stone-500 dark:text-stone-400 font-sans font-semibold">Cloudflare Deployment:</div>
+              <div className="select-all text-emerald-600 dark:text-emerald-400 font-bold">npx wrangler secret put ADMIN_API_KEY</div>
+              <div className="text-stone-500 dark:text-stone-400 font-sans font-semibold mt-1.5">Direct API Requests:</div>
+              <div className="text-stone-600 dark:text-stone-300">Header: <code className="text-cyan-400">Authorization: Bearer &lt;KEY&gt;</code></div>
+            </div>
           </div>
 
           {/* Error Message */}
           {loginError && (
-            <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 rounded text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2 animate-fade-in">
+            <div className="mb-4 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-800 rounded text-rose-800 dark:text-rose-200 text-xs flex items-start gap-2.5 animate-fade-in">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
-              <div>
-                <p className="font-bold">प्रवेश नाकारला</p>
-                <p>{loginError}</p>
+              <div className="space-y-1">
+                <p className="font-bold">Authentication Diagnostic</p>
+                <p className="leading-relaxed">{loginError}</p>
               </div>
             </div>
           )}
@@ -499,16 +509,16 @@ export const EditorialDashboardPage: React.FC<EditorialDashboardPageProps> = ({
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1.5">
-                संपादकीय सुरक्षा की (Secret Access Key)
+                Admin Secret Key (ADMIN_API_KEY)
               </label>
               <div className="relative">
                 <input
                   type="password"
-                  placeholder="सुरक्षा की प्रविष्ट करा..."
+                  placeholder="Enter your admin secret key..."
                   value={loginSecret}
                   onChange={(e) => setLoginSecret(e.target.value)}
                   disabled={loginLoading}
-                  className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded focus:outline-hidden focus:ring-2 focus:ring-red-600 font-mono"
+                  className="w-full px-3 py-2 text-sm bg-stone-50 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded focus:outline-hidden focus:ring-2 focus:ring-cyan-500 font-mono text-stone-900 dark:text-stone-100"
                   autoFocus
                 />
                 <KeyRound className="w-4 h-4 absolute right-3 top-2.5 text-stone-400" />
@@ -518,24 +528,40 @@ export const EditorialDashboardPage: React.FC<EditorialDashboardPageProps> = ({
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full py-2.5 px-4 bg-red-700 hover:bg-red-800 text-white rounded font-bold text-xs sm:text-sm tracking-wide transition-colors shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 bg-cyan-700 hover:bg-cyan-800 text-white rounded font-bold text-xs sm:text-sm tracking-wide transition-colors shadow-md disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
             >
               {loginLoading ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  पडताळणी सुरू आहे...
+                  Verifying Credentials...
                 </>
               ) : (
-                'संपादकीय कक्षात प्रवेश करा'
+                'Unlock Peer-Review Newsroom'
               )}
             </button>
           </form>
 
-          {/* Cloudflare Setup Note */}
-          <div className="mt-6 pt-4 border-t border-stone-200 dark:border-stone-800 text-center">
-            <span className="text-[11px] text-stone-400 font-sans">
-              स्थानिक विकासासाठी <code className="font-mono text-stone-500">.dev.vars</code> वापरा.
-            </span>
+          {/* Preview Quick Launch */}
+          <div className="mt-5 pt-4 border-t border-stone-200 dark:border-stone-800 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginSecret('curiosity-preview-key');
+                newsService.loginEditorial('curiosity-preview-key').then((res) => {
+                  if (res.success) {
+                    setAuthState({
+                      checking: false,
+                      authenticated: true,
+                      user: { role: 'editor', editorInChief: 'Shubham Sonale' },
+                    });
+                    showToast('Preview Newsroom Workspace Activated');
+                  }
+                });
+              }}
+              className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer font-medium"
+            >
+              Launch Local Preview Workspace (Instant Access) →
+            </button>
           </div>
         </div>
       </div>

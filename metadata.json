@@ -1,6 +1,6 @@
 {
-  "name": "Samvad Intel - Information Intelligence & Research Platform",
-  "description": "Samvad Intel is a high-performance open-source information intelligence, topic exploration, and multi-source verification platform. Powered by Cloudflare Workers and D1 edge storage, it tracks verified government communications, national developments, and regional intelligence across languages with source transparency.",
+  "name": "Curiosity Research - Global Science & Technology Discovery Platform",
+  "description": "Curiosity Research is an open scientific discovery platform created by Shubham Sonale (Tagline: 'Discover What's Next'). Explore breakthrough research papers, scientific journals, real-time breakthrough streams, and in-depth coverage across Space, Quantum Physics, AI, Biotechnology, Medicine, Clean Energy, and Indian Research Institutions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -1,6 +1,8 @@
 /**
  * @file StoryWorkspace.tsx
- * Professional Editorial Story Workspace for Bahumol Samaj Weekly Newspaper.
+ * Professional Editorial Story Workspace for Curiosity Research.
+ * Creator: Shubham Sonale
+ * Tagline: Discover What's Next.
  * - Distinct separation between Immutable Original Wire Metadata and Editable Marathi Content
  * - High-Fidelity Public Newspaper Preview Panel
  * - Full Editorial Status Lifecycle: Draft -> Review -> Approve -> Publish / Reject / Archive

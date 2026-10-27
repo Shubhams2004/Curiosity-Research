@@ -8,7 +8,7 @@
 
 import { Env, ExecutionContext, ScheduledEvent } from './types';
 import { handleApiRequest } from './api';
-import { runIngestionPipeline } from './ingestion';
+import { runIngestionPipeline, purgeOldNews } from './ingestion';
 
 export default {
   /**
@@ -44,10 +44,13 @@ export default {
     console.log(`[Curiosity Cron] Scheduled research discovery ingestion triggered at ${new Date(event.scheduledTime).toISOString()}`);
     ctx.waitUntil(
       runIngestionPipeline(env)
-        .then((summary) => {
+        .then(async (summary) => {
           console.log(
             `[Curiosity Cron] Ingestion completed: ${summary.newStoriesInserted} new, ${summary.duplicatesSkipped} skipped, ${summary.failedSources} errors`
           );
+          // Regularly delete old news and maintain a clean, fresh D1 database
+          const purgeRes = await purgeOldNews(env.DB, 14);
+          console.log(`[Curiosity Cron] ${purgeRes.message}`);
         })
         .catch((err) => {
           console.error('[Curiosity Cron] Ingestion failed:', err);

@@ -216,6 +216,9 @@ export async function runIngestionPipeline(
   // Preserves ALL published, approved, and review stories forever
   await applyRetentionRules(env.DB);
 
+  // Regularly remove and delete old news to keep the database and intelligence streams clean and fresh
+  await purgeOldNews(env.DB, 14);
+
   return summary;
 }
 
@@ -255,6 +258,8 @@ export async function applyRetentionRules(
           AND updated_at < datetime('now', '-60 days')
       `)
       .run();
+    prunedCount = pruneRes.meta?.changes || 0;
+
     // 3. Systematically prune obsolete legacy newspaper sources if any remain
     try {
       await db
@@ -273,7 +278,8 @@ export async function applyRetentionRules(
 
 /**
  * Remove old news on demand or schedule to maintain a fresh, latest intelligence feed.
- * Allows specifying threshold in days (default: 14 days for unreviewed, 30 days for archived).
+ * Allows specifying threshold in days (default: 14 days for unreviewed and archived news).
+ * Automatically purges legacy newspaper sources and prunes stale unedited records.
  */
 export async function purgeOldNews(
   db: Env['DB'],
@@ -282,7 +288,7 @@ export async function purgeOldNews(
   let totalDeleted = 0;
 
   try {
-    // Delete old unreviewed incoming news older than daysThreshold
+    // 1. Delete old unreviewed incoming news older than daysThreshold
     const res1 = await db
       .prepare(`
         DELETE FROM stories
@@ -294,7 +300,7 @@ export async function purgeOldNews(
       .run();
     totalDeleted += res1.meta?.changes || 0;
 
-    // Delete old rejected or archived news older than daysThreshold
+    // 2. Delete old rejected or archived news older than daysThreshold
     const res2 = await db
       .prepare(`
         DELETE FROM stories
@@ -306,14 +312,45 @@ export async function purgeOldNews(
       .run();
     totalDeleted += res2.meta?.changes || 0;
 
-    // Purge any residual obsolete newspaper stories
+    // 3. Purge obsolete legacy newspaper stories
     const res3 = await db
       .prepare(`
         DELETE FROM stories
-        WHERE source_id IN ('src_sakal_mr', 'src_loksatta_mr', 'src_in_sakal', 'src_dd_mr', 'src_gov_mahanews', 'src_gov_pib_mr')
+        WHERE source_id IN (
+          'src_sakal_mr', 'src_loksatta_mr', 'src_in_sakal', 'src_dd_mr', 'src_gov_mahanews',
+          'src_gov_pib_mr', 'src_gov_rbi', 'src_gov_pib_national', 'src_in_thehindu',
+          'src_in_ndtv', 'src_intl_bbc', 'src_intl_un', 'src_intl_aljazeera', 'src_air_mr'
+        )
       `)
       .run();
     totalDeleted += res3.meta?.changes || 0;
+
+    // 4. Ensure legacy newspaper feeds are marked inactive so they are never fetched
+    try {
+      await db
+        .prepare(`
+          UPDATE news_sources
+          SET active = 0
+          WHERE id IN (
+            'src_sakal_mr', 'src_loksatta_mr', 'src_in_sakal', 'src_dd_mr', 'src_gov_mahanews',
+            'src_gov_pib_mr', 'src_gov_rbi', 'src_gov_pib_national', 'src_in_thehindu',
+            'src_in_ndtv', 'src_intl_bbc', 'src_intl_un', 'src_intl_aljazeera', 'src_air_mr'
+          )
+        `)
+        .run();
+    } catch {}
+
+    // 5. Delete very old unedited published general stories older than 60 days (preserving landmark breakthroughs)
+    const res4 = await db
+      .prepare(`
+        DELETE FROM stories
+        WHERE status = 'published'
+          AND (is_breakthrough IS NULL OR is_breakthrough = 0)
+          AND (is_edited IS NULL OR is_edited = 0)
+          AND (published_at < datetime('now', '-60 days') OR created_at < datetime('now', '-60 days'))
+      `)
+      .run();
+    totalDeleted += res4.meta?.changes || 0;
   } catch (err) {
     console.warn('[Curiosity Purge] Error purging old news:', err);
   }
